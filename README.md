@@ -29,7 +29,7 @@ Alternately, to set up with docker
 `docker build -t kage-backend-django .`
 
 Then to run an interactive terminal for development run:
-`docker run -it --rm -v "$(pwd)":/app -w /app kage-backend-django bash`
+`docker run -it --rm -p 8080:8080 -v "$(pwd)":/app -w /app kage-backend-django bash`
 
 Alternately to run the app itself run
 

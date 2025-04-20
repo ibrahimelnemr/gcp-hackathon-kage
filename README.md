@@ -35,3 +35,11 @@ Alternately to run the app itself run
 
 `docker run -d -p 8080:8080 -v "$(pwd)":/app -w /app my-python-app`
 
+## Database schema
+
+
+## Django development
+
+`python manage.py makemigrations api`
+
+`python manage.py migrate`

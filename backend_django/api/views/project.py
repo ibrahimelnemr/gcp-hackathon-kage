@@ -1,7 +1,7 @@
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Project, Task
-from .serializers import ProjectSerializer, TaskSerializer
+from ..models import Project, Task
+from ..serializers import ProjectSerializer, TaskSerializer
 
 @api_view(['POST'])
 def create_project(request):

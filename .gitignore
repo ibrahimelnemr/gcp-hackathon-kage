@@ -2,3 +2,4 @@ venv
 .env
 backend_django/centered*
 logs
+output_plans

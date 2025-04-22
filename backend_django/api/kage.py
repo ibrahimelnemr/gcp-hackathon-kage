@@ -14,6 +14,7 @@ from langchain_core.prompts import PromptTemplate
 import vertexai
 from vertexai.generative_models import GenerativeModel, Part
 from langchain_google_vertexai import ChatVertexAI 
+from google.cloud import aiplatform
 
 
 load_dotenv()

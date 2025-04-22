@@ -53,3 +53,17 @@ add a `.env` file in the `backend_django` root folder and set
 `python manage.py runserver 0.0.0.0:8080`
 
 `python manage.py test`
+
+## Troubleshooting
+
+gcloud ai models list --project=centered-accord-442214-b9 --region=us-central1 
+
+gcloud projects add-iam-policy-binding centered-accord-442214-b9 \
+  --member="serviceAccount:895087232693-compute@developer.gserviceaccount.com" \
+  --role="roles/aiplatform.admin"
+
+gcloud services enable aiplatform.googleapis.com --project=centered-accord-442214-b9
+
+gcloud projects add-iam-policy-binding centered-accord-442214-b9 \
+  --member="serviceAccount:895087232693-compute@developer.gserviceaccount.com" \
+  --role="roles/aiplatform.admin"

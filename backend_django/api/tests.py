@@ -4,7 +4,6 @@ from .models import Employee, Project, Task
 
 
 class SampleDataTestCase(TestCase):
-    databases = {'default'}  # Explicitly use the default database
 
     def create_sample_data(self):
         """

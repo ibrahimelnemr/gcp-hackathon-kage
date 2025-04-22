@@ -5,13 +5,6 @@ from rest_framework.response import Response
 from ..models import Project, Task
 from ..serializers import ProjectSerializer, TaskSerializer
 
-@api_view(['POST'])
-def create_project(request):
-    serializer = ProjectSerializer(data=request.data)
-    if serializer.is_valid():
-        serializer.save()
-        return Response(serializer.data, status=201)
-    return Response(serializer.errors, status=400)
 
 @api_view(['GET'])
 def get_tasks(request, project_id):
@@ -57,3 +50,45 @@ def generate_plan(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
 
+@api_view(['POST'])
+def create_project(request):
+    """
+    Handles a POST request to retrieve tasks based on the provided project data.
+    """
+    try:
+        # Extract project data from the request
+        project_name = request.data.get('project_name')
+        project_description = request.data.get('project_description')
+        team_members = request.data.get('team_members', [])
+
+        print("Received project data:", project_name, project_description, team_members)
+
+        tasks = Task.objects.all()
+
+        # Serialize the tasks
+        serializer = TaskSerializer(tasks, many=True)
+
+        # Return the serialized tasks as a JSON response
+        return Response(serializer.data, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)
+    
+    
+@api_view(['GET'])
+def get_projects(request):
+    """
+    Handles a GET request to retrieve all projects from the database.
+    """
+    try:
+        # Retrieve all projects from the database
+        projects = Project.objects.all()
+
+        # Serialize the projects
+        serializer = ProjectSerializer(projects, many=True)
+
+        # Return the serialized projects as a JSON response
+        return Response(serializer.data, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=400)

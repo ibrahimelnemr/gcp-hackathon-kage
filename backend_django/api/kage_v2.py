@@ -113,25 +113,74 @@ class Kage:
 
         experience_definitions = """
         **Experience Level Guidelines (Based on Company Structure):**
-        *   **Analyst (0-2 years)**: Executes specific tasks.
-        *   **Consultant (2-5 years)**: Executes tasks with less supervision.
-        *   **Senior Consultant (3+ years)**: Provides oversight and integrates work.
+
+        *   **Analyst (Typically 0-2 years company experience):**
+            *   Focus: Primarily executes specific, assigned tasks within their department.
+            *   Oversight: Requires guidance and reports to the most senior role from their *same department* who is assigned to the project. This senior role must be *at least* a Senior Consultant level.
+
+        *   **Consultant (Typically 2-5 years company experience):**
+            *   Focus: A more experienced Analyst, expected to execute assigned tasks with higher proficiency and potentially less direct supervision than an Analyst. Still primarily focused on execution within their department.
+            *   Oversight: Also reports to the most senior role from their same department (Senior Consultant or higher) for guidance and review. *Potentially could take on oversight if senior role is absent and capability/willingness is confirmed.
+
+        *   **Senior Consultant (Typically 3+ years company experience):**
+            *   Focus: Works on combining the input of the lower experience levels into a professional clean "final product". **Does not work on their own tasks**, they merely help put everything together.
+            *   Oversight Role: **Provides guidance and oversight** for Analysts and Consultants within their *same department* on the project. This is the minimum level required for this departmental oversight function.
+            *   Contribution: Expected to deliver high-quality work and potentially lead specific technical areas or workstreams within their department's scope.
+
+        *   **Senior Oversight / Lead Role (Often a Senior Consultant or Manager):**
+            *   Focus: This function (which might be fulfilled by the most senior person present, e.g., a lead Senior Consultant) is responsible for compiling and integrating the work produced by their department members on the project.
+            *   Responsibility: Ensures the department's output is neat, concise, consistent, and meets quality standards before being considered "final" for integration with other project parts. May involve reviewing work, coordinating tasks within the department, and potentially managing the departmental workload for the project.
+
+        *(Use these specific guidelines to interpret roles, assign tasks, and identify missing roles/oversight.)*
         """
 
         prompt_template = PromptTemplate(
             template="""
-            You are KAGE, an expert project management assistant. Your goal is to create a structured project plan.
+            You are KAGE, an expert project management assistant. Your goal is to create a structured project plan by first decomposing the work, then assigning it to the available team, and finally identifying any gaps including workload imbalances.
 
             **Project Description:**
             {project_description}
 
             {experience_definitions}
 
-            **Available Team Roles:**
+            **Available Team Roles (Experience: Department):**
+            (**IMPORTANT:** Team roles may include a number at the end (such as Analyst 1 or Consultant 2) in order for the dictionary to distinguish between the titles. Treat the roles as if they do not have a number at the end.)
             {team_roles}
+
+            **Instructions - Follow these steps SEQUENTIALLY:**
+
+            1.  **Decompose Project into Tasks (Team Independent):**
+                *   Analyze the **Project Description** *only*.
+                *   Break down the project into a list of concise, actionable tasks. Each task should represent a logical chunk of work ideally manageable by a single person.
+                *   **Do NOT consider the 'Available Team Roles' during this decomposition step.** Focus solely on the work required by the project itself.
+                *   Assign a unique sequential 'task_id' starting from 1 to each decomposed task.
+
+            2.  **Assign Decomposed Tasks to Available Roles:**
+                *   Now, take the list of tasks created in Step 1.
+                *   For *each* task, attempt to assign it to the *most suitable* team member profile from the 'Available Team Roles' list (anything to do with data extraction or AI should be assigned to AI and Data for example).
+                *   Base the assignment on the task's nature, its inferred skill requirements, and the 'Experience Level Guidelines' provided above.
+                *   Use the exact Experience and Department strings from the 'Available Team Roles' when assigning.
+                *   Provide a 'rationale' for each task assignment, explaining *why* that specific role profile is the best fit from the available options, or noting if the fit isn't perfect but is the closest available.
+
+            3.  **Identify Missing Roles, Skills, Oversight, and Workload Gaps:**
+                *   Analyze the task list (Step 1) and assignments (Step 2) against 'Available Team Roles'.
+                *   **(a) Skill/Department Gaps:** Identify critical skills/departments needed for tasks but completely absent in the team. Recommend adding appropriate roles (Experience Level + Department).
+                *   **(b) Oversight Gaps:** Verify required Senior Consultant (or higher) oversight for departments with assigned Analysts/Consultants. If missing, recommend adding a 'Senior Consultant' for that department, noting the Consultant alternative if applicable (needs confirmation).
+                *   **(c) Workload Imbalance Analysis:**
+                    i.  **Count Tasks per Unique Role:** For each unique role key in 'Available Team Roles', count how many tasks were assigned to it in Step 2.
+                    ii. **Identify Potential Overload:** Pay close attention to any unique role key assigned a high number of tasks - **consider 2 or more tasks as potentially high load**, adjust based on task nature. Also consider if a junior role (Analyst) is assigned many complex tasks. **No analyst should have more than 2 tasks** so suggest more analysts if need be.
+                    iii.**Check for Reassignment:** Before recommending new hires *purely* for workload, check: Could any tasks assigned to an identified overloaded role be *reasonably* reassigned to another *existing* unique role key that has significantly fewer tasks assigned, even if the skill fit is slightly less perfect? Note this possibility if applicable.
+                    iv. **Recommend Additions for Workload:** If reassignment is not feasible or insufficient, and a role/department remains overloaded (based on task count or complexity for role level), **recommend adding another specific role** (typically 'Analyst' or 'Consultant') to that department.
+                    v.  **Mandatory Reasoning:** The 'reasoning' for any role recommended *due to workload* **must explicitly state** "Workload balancing for [Department Name]", mention the overloaded role(s) (e.g., "to support [Unique Role Key]"), and ideally reference the high task count (e.g., "due to high task count assigned"). If suggesting reassignment was considered, mention that briefly in the reasoning for adding the new role (e.g., "...reassignment insufficient").
+                *   Combine all findings (a, b, c) into the `missing_roles` list. Provide clear 'reasoning' for each suggestion per the instructions.
+                *   If no gaps found, provide an empty list for `missing_roles`.
+
+            4.  **Output Format:** Structure your entire response strictly as a JSON object conforming to the following schema. Do **not** include any text outside the JSON structure.
 
             **Output JSON Schema:**
             {format_instructions}
+
+            Generate the project plan now.
             """,
             input_variables=["project_description", "team_roles"],
             partial_variables={

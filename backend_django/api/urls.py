@@ -1,13 +1,8 @@
-from django.urls import path
-from .views import *
+from django.urls import path, include
 
 urlpatterns = [
-    path('/test', index, name='index'),
-    path('', generate_plan, name='generate_plan'),
-    path('testdb/', testdb, name='testdb'),
-    path('create-project/', create_project, name='create_project'),
-    path('get-tasks/<int:project_id>/', get_tasks, name='get_tasks'),
-    path('ai-chat/', ai_chat),
-    path('check-gcp-connection/', check_gcp_connection, name='check_gcp_connection'),
-    path('check-vertex-ai-connection/', check_vertex_ai_connection, name='check_vertex_ai_connection')
+    path('', include('api.urls.general')),
+    path('project/', include(('api.urls.project', 'project'))),
+    path('ai/', include(('api.urls.ai', 'ai'))),
+    path('gcp/', include(('api.urls.gcp', 'gcp'))),
 ]

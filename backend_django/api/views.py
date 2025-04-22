@@ -151,4 +151,6 @@ def check_vertex_ai_connection(request):
         return Response(response.text, status=200)
 
     except Exception as e:
-        return {"error": str(e)}
+        # return {"error": str(e)}
+        # return Response({"error": str(e)}, status=500)
+        return JsonResponse({"error": str(e)}, status=500)

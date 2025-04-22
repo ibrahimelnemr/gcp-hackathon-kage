@@ -37,9 +37,17 @@ Alternately to run the app itself run
 
 ## Database schema
 
+## Connect to vertex AI
+
+in the `backend_django` root folder add the credentials file `centered-accord-442214-b9-12a090e7cfac.json`
+
+add a `.env` file in the `backend_django` root folder and set
+`GOOGLE_APPLICATION_CREDENTIALS=centered-accord-442214-b9-12a090e7cfac.json`
 
 ## Django development
 
 `python manage.py makemigrations api`
 
 `python manage.py migrate`
+
+`python manage.py runserver 0.0.0.0:8080`

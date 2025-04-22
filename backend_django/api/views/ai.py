@@ -60,3 +60,20 @@ def ai_chat(request):
         # return {"error": str(e)}
         # return Response({"error": str(e)}, status=500)
         return JsonResponse({"error": str(e)}, status=500)
+    
+    
+# @api_view(['GET'])
+# def ai_chat(request):
+#     try:
+#         # data = json.loads(request.body)
+#         # user_input = data.get("message", "")
+#         user_input = "Hello"
+#         if not user_input:
+#             return JsonResponse({"error": "Missing 'message' in request body."}, status=400)
+
+#         # Generate response using Gemini model
+#         response = model.generate_content(user_input)
+#         return JsonResponse({"response": response.text})
+
+#     except Exception as e:
+#         return JsonResponse({"error": str(e)}, status=500)

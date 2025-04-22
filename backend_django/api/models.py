@@ -26,7 +26,7 @@ class Task(models.Model):
     ]
 
     project = models.ForeignKey(Project, related_name='tasks', on_delete=models.CASCADE)
-    employee = models.ForeignKey(Employee, related_name='tasks', on_delete=models.CASCADE)  
+    employee = models.ForeignKey(Employee, related_name='tasks', on_delete=models.CASCADE, null=True)
     description = models.TextField()
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='pending') 
 

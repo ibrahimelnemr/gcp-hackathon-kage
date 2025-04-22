@@ -51,3 +51,5 @@ add a `.env` file in the `backend_django` root folder and set
 `python manage.py migrate`
 
 `python manage.py runserver 0.0.0.0:8080`
+
+`python manage.py test`

@@ -32,7 +32,7 @@ model = GenerativeModel("gemini-pro")
 
 #     except Exception as e:
 #         return JsonResponse({"error": str(e)}, status=500)
-    
+
 
 @api_view(['GET'])
 def ai_chat(request):
@@ -49,7 +49,7 @@ def ai_chat(request):
         # Initialize the Vertex AI client with your project and location
         aiplatform.init(project='centered-accord-442214-b9', location='us-central1')
 
-        models = aiplatform.Model.list()  
+        models = aiplatform.Model.list()
 
         model_names = [model.display_name for model in models]
 

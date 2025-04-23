@@ -6,9 +6,8 @@ import vertexai
 from google.cloud import aiplatform
 from google import genai
 from google.genai import types
-from .kage import Kage  # Import the Kage class
+from ..kage import Kage
 import json
-
 from dotenv import load_dotenv
 
 load_dotenv() 
@@ -37,8 +36,7 @@ def generate_project_plan(request):
 
         if not isinstance(team_roles, dict):
             return JsonResponse({"error": "'team_roles' must be a dictionary."}, status=400)
-
-        # Initialize the Kage class and generate the project plan
+        
         kage = Kage()
         project_plan = kage.generate_project_plan(
             project_name=project_name,

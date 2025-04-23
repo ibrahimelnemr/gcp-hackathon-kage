@@ -1,5 +1,5 @@
 venv
 .env
-backend_django/centered*
+backend/centered*
 logs
 output_plans

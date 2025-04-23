@@ -6,6 +6,8 @@ import vertexai
 from google.cloud import aiplatform
 from google import genai
 from google.genai import types
+from .kage import Kage  # Import the Kage class
+import json
 
 from dotenv import load_dotenv
 
@@ -20,19 +22,35 @@ client = genai.Client(
 
 model = GenerativeModel("gemini-pro")
 
-# @api_view(['GET'])
-# def ai_chat(request):
-#     try:
-#         user_input = "Hello"
-#         if not user_input:
-#             return JsonResponse({"error": "Missing 'message' in request body."}, status=400)
+@api_view(['POST'])
+def generate_project_plan(request):
+    try:
+        # Parse the input data from the request body
+        data = json.loads(request.body)
+        project_name = data.get("project_name")
+        project_description = data.get("project_description")
+        team_roles = data.get("team_roles")
 
-#         response = model.generate_content(user_input)
-#         return JsonResponse({"response": response.text})
+        # Validate input fields
+        if not project_name or not project_description or not team_roles:
+            return JsonResponse({"error": "Missing required fields: 'project_name', 'project_description', or 'team_roles'."}, status=400)
 
-#     except Exception as e:
-#         return JsonResponse({"error": str(e)}, status=500)
+        if not isinstance(team_roles, dict):
+            return JsonResponse({"error": "'team_roles' must be a dictionary."}, status=400)
 
+        # Initialize the Kage class and generate the project plan
+        kage = Kage()
+        project_plan = kage.generate_project_plan(
+            project_name=project_name,
+            project_description=project_description,
+            team_roles=team_roles
+        )
+
+        # Return the generated project plan as a JSON response
+        return JsonResponse(project_plan, safe=False, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
 
 @api_view(['GET'])
 def ai_chat(request):
@@ -60,20 +78,3 @@ def ai_chat(request):
         # return {"error": str(e)}
         # return Response({"error": str(e)}, status=500)
         return JsonResponse({"error": str(e)}, status=500)
-    
-    
-# @api_view(['GET'])
-# def ai_chat(request):
-#     try:
-#         # data = json.loads(request.body)
-#         # user_input = data.get("message", "")
-#         user_input = "Hello"
-#         if not user_input:
-#             return JsonResponse({"error": "Missing 'message' in request body."}, status=400)
-
-#         # Generate response using Gemini model
-#         response = model.generate_content(user_input)
-#         return JsonResponse({"response": response.text})
-
-#     except Exception as e:
-#         return JsonResponse({"error": str(e)}, status=500)

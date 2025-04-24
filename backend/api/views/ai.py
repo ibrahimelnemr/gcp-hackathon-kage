@@ -9,6 +9,7 @@ from google.genai import types
 from ..kage import Kage
 import json
 from dotenv import load_dotenv
+from ..models import Project, Task, Employee  # Import the models
 
 load_dotenv() 
 
@@ -26,23 +27,62 @@ def generate_project_plan(request):
     try:
         # Parse the input data from the request body
         data = json.loads(request.body)
-        project_name = data.get("project_name")
-        project_description = data.get("project_description")
-        team_roles = data.get("team_roles")
 
-        # Validate input fields
-        if not project_name or not project_description or not team_roles:
-            return JsonResponse({"error": "Missing required fields: 'project_name', 'project_description', or 'team_roles'."}, status=400)
+        # Default mock data
+        default_project_name = "Default Project"
+        default_project_description = (
+            "Start Date: April 2025\n"
+            "Develop an AI agent that can extract text from a contract (word document) and compare it to a template. "
+            "The AI agent must be able to compare the contract to the template and provide differences where the contract "
+            "does not comply with the template and provide a proposal to the contract.\n"
+            "Platform: Azure OpenAI, Python backend, frontend.\n"
+            "Cloud: AWS. Requires AWS expertise for deployment and service integration.\n"
+            "Goal: Demonstrable proof-of-concept for company to test.\n"
+            "End Date: June 2025"
+        )
+        default_team_roles = {
+            "Analyst 1": "AI and Data",
+            "Senior Consultant 1": "AI and Data",
+            "Consultant 1": "Cloud",
+            "Senior Consultant 2": "Cloud",
+            "Analyst 2": "Fullstack",
+            "Senior Consultant 3": "Fullstack",
+        }
 
+        # Use provided data or fallback to defaults
+        project_name = data.get("project_name", default_project_name)
+        project_description = data.get("project_description", default_project_description)
+        team_roles = data.get("team_roles", default_team_roles)
+
+        # Validate team_roles format
         if not isinstance(team_roles, dict):
             return JsonResponse({"error": "'team_roles' must be a dictionary."}, status=400)
-        
+
+        # Initialize the Kage class and generate the project plan
         kage = Kage()
         project_plan = kage.generate_project_plan(
             project_name=project_name,
             project_description=project_description,
             team_roles=team_roles
         )
+
+        # Save the project to the database
+        project = Project.objects.create(name=project_name, description=project_description)
+
+        # Create employees based on team_roles
+        employees = {}
+        for role, department in team_roles.items():
+            employee = Employee.objects.create(name=role, level=role, department=department)
+            employees[role] = employee
+
+        # Create tasks based on the project plan
+        for task in project_plan.get("tasks", []):
+            Task.objects.create(
+                project=project,
+                employee=employees.get(task.get("assigned_role_experience")),  # Assign employee if available
+                description=task.get("description", ""),
+                status="pending"  # Default status
+            )
 
         # Return the generated project plan as a JSON response
         return JsonResponse(project_plan, safe=False, status=200)

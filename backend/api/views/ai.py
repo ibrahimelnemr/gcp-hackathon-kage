@@ -77,9 +77,13 @@ def generate_project_plan(request):
 
         # Create tasks based on the project plan
         for task in project_plan.get("tasks", []):
+            assigned_role = task.get("assigned_role_experience")  # Get the role assigned to the task
+            assigned_employee = employees.get(assigned_role)  # Find the employee for the role
+            if not assigned_employee:
+                print(f"Warning: No employee found for role {assigned_role}")  # Debugging log
             Task.objects.create(
                 project=project,
-                employee=employees.get(task.get("assigned_role_experience")),  # Assign employee if available
+                employee=assigned_employee,  # Assign the correct employee
                 description=task.get("description", ""),
                 status="pending"  # Default status
             )
@@ -115,4 +119,40 @@ def ai_chat(request):
     except Exception as e:
         # return {"error": str(e)}
         # return Response({"error": str(e)}, status=500)
+        return JsonResponse({"error": str(e)}, status=500)
+
+@api_view(['GET'])
+def get_projects(request):
+    try:
+        # Fetch all projects
+        projects = Project.objects.all()
+
+        # Prepare the response data
+        response_data = []
+        for project in projects:
+            # Fetch tasks related to the project
+            tasks = Task.objects.filter(project=project).select_related('employee')
+
+            # Prepare task details
+            task_list = []
+            for task in tasks:
+                task_list.append({
+                    "status": task.status,
+                    "description": task.description,
+                    "employee_name": task.employee.name if task.employee else None,
+                    "employee_level": task.employee.level if task.employee else None,
+                    "employee_department": task.employee.department if task.employee else None,
+                })
+
+            # Add project details to the response
+            response_data.append({
+                "project_name": project.name,
+                "project_description": project.description,
+                "tasks": task_list
+            })
+
+        # Return the response as JSON
+        return JsonResponse(response_data, safe=False, status=200)
+
+    except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)

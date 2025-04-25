@@ -12,3 +12,4 @@ langchain_google_vertexai
 google-auth
 google-api-python-client
 google-cloud-storage
+psycopg2-binary

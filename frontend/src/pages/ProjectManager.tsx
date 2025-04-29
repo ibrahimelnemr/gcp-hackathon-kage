@@ -194,6 +194,9 @@ export default function ProjectManager() {
       const data = {
         generated_plan: response
       }
+
+      console.log("Data from API call to generate project: ");
+      console.log(data);
       
       if (response) {
         setAnalysisResult(data);

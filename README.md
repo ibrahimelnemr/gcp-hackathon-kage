@@ -70,9 +70,9 @@ Project
 
 Task
 - id: int
-- project_id: (int) ForeignKey -> Project
-- employee_id: (int) ForeignKey —> Employee
-- description: String
+- project_id: int
+- employee_id: int
+- description: string
 
 
 

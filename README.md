@@ -42,25 +42,14 @@ To run the app itself:
 
 `docker build -t kage-frontend .`
 
-To run an interactive terminal development:
-`docker run -it --rm -p 5173:5173 -v "$(pwd)":/app -w /app kage-frontend bash`
-
 Run the app itself (terminal), remove container when finished to view/test app
 `docker run --rm -it -p 5173:5173 kage-frontend`
 
 Run the app itself in terminal, remove container when finished, allow for local development, include container node modules not local
 `docker run --rm -it -p 5173:5173 -v "$(pwd)":/app -v kage-frontend_node_modules:/app/node_modules -w /app kage-frontend`
 
-`docker run -p 5173:5173 -v "$(pwd)":/app -w /app kage-frontend`
-
 Run app
 `docker run -p 5173:5173 kage-frontend`
-
-To run the app itself in terminal
-`docker run --rm -it -p 5173:5173 -v "$(pwd)":/app -w /app kage-frontend`
-
-
-`docker run -d -p 5173:5173 -v "$(pwd)":/app -w /app kage-frontend`
 
 ## Database schema
 

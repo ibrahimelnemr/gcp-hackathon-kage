@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { ArrowRight, Terminal, Users, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AnimatedGradientBackground } from '@/components/ui/animated-gradient-background';
@@ -6,12 +6,11 @@ import { motion } from 'framer-motion';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { BACKEND_URL } from '@/data/Data';
+import { TaskBoard } from '@/components/project/TaskBoard';
+import { Task } from '@/data/Interfaces';
 
-interface Task {
-  status: string;
-  description: string;
-  employee_name: string | null;
-}
+
 
 interface Project {
   project_name: string;
@@ -21,69 +20,30 @@ interface Project {
 
 export default function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const projectId = searchParams.get('project_id');
 
   useEffect(() => {
-    // Simulate fetching data from an API
     const fetchProjects = async () => {
-      const mockData: Project[] = [
-        {
-          project_name: "Default Project",
-          project_description:
-            "Start Date: April 2025\nDevelop an AI agent that can extract text from a contract (word document) and compare it to a template. The AI agent must be able to compare the contract to the template and provide differences where the contract does not comply with the template and provide a proposal to the contract.\nPlatform: Azure OpenAI, Python backend, frontend.\nCloud: AWS. Requires AWS expertise for deployment and service integration.\nGoal: Demonstrable proof-of-concept for company to test.\nEnd Date: June 2025",
-          tasks: [
-            {
-              status: "pending",
-              description: "Prepare documentation and training materials for the proof-of-concept demonstration.",
-              employee_name: "John Doe",
-            },
-            {
-              status: "in-progress",
-              description: "Develop the backend API to connect the frontend with the AI agent and AWS services.",
-              employee_name: "Jane Smith"
-            },
-            {
-              status: "completed",
-              description: "Develop the frontend UI for user interaction and display of results.",
-              employee_name: "Alice Johnson",
-            },
-            {
-              status: "pending",
-              description: "Integrate the AI agent with the AWS infrastructure.",
-              employee_name: "Bob Brown"
-            },
-            {
-              status: "in-progress",
-              description: "Set up AWS infrastructure for the project (e.g., compute, storage, networking).",
-              employee_name: "Charlie Green",
-            },
-            {
-              status: "pending",
-              description: "Develop the proposal generation functionality based on comparison results.",
-              employee_name: "Diana White",
-            },
-            {
-              status: "pending",
-              description: "Design and implement the contract comparison logic against a template using Azure OpenAI.",
-              employee_name: "Eve Black",
-            },
-            {
-              status: "completed",
-              description: "Develop text extraction functionality from Word documents using Azure OpenAI.",
-              employee_name: "Frank Blue",
-            },
-          ],
-        },
-      ];
-      setProjects(mockData);
+      try {
+        const response = await fetch(`${BACKEND_URL}/project`);
+        if (!response.ok) throw new Error('Failed to fetch projects');
+        const data = await response.json();
+        setProjects(data);
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+      }
     };
 
     fetchProjects();
   }, []);
 
   const handleProjectClick = (project: Project) => {
-    navigate(`/projects/${project.project_name}`, { state: { project } });
+    navigate(`/projects?project_id=${project.project_name}`);
   };
+
+  const selectedProject = projects.find((project) => project.project_name === projectId);
 
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
@@ -130,35 +90,49 @@ export default function Projects() {
       {/* Projects Section */}
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-8">Projects</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {projects.map((project, index) => (
-            <motion.div
-              key={index}
-              className="bg-kage-gray rounded-lg p-6 shadow-md hover:shadow-lg transition-all duration-300 border border-border"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
-            >
-              <Card>
-                <CardHeader>
-                  <CardTitle>{project.project_name}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    {project.project_description.split("\n")[0]} {/* Display first line */}
-                  </p>
-                  <Button
-                    variant="default"
-                    onClick={() => handleProjectClick(project)}
-                  >
-                    View Details
-                  </Button>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
-        </div>
+
+        {!projectId ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {projects.map((project, index) => (
+              <motion.div
+                key={index}
+                className="bg-kage-gray rounded-lg p-6 shadow-md hover:shadow-lg transition-all duration-300 border border-border"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <Card>
+                  <CardHeader>
+                    <CardTitle>{project.project_name}</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      {project.project_description.split("\n")[0]} {/* Display first line */}
+                    </p>
+                    <Button
+                      variant="default"
+                      onClick={() => handleProjectClick(project)}
+                    >
+                      View Details
+                    </Button>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </div>
+        ) : (
+          selectedProject && (
+            <div>
+              <h2 className="text-2xl font-bold mb-4">{selectedProject.project_name}</h2>
+              <p className="mb-4">{selectedProject.project_description}</p>
+              <TaskBoard tasks={selectedProject.tasks} />
+              <Button variant="secondary" onClick={() => navigate('/projects')}>
+                Back to Projects
+              </Button>
+            </div>
+          )
+        )}
       </div>
     </div>
   );

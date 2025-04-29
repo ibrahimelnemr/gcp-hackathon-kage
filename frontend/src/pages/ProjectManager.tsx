@@ -12,8 +12,8 @@ import { format } from 'date-fns';
 import HttpHook from '@/hooks/HttpHook';
 import { TaskBoard } from '@/components/project/TaskBoard';
 import { BACKEND_URL, SAMPLE_PROJECT_NAME, SAMPLE_PROJECT_DESCRIPTION, SAMPLE_TEAM_MEMBERS } from '@/data/Data';
+import { useNavigate } from 'react-router-dom';
 
-// Define the team member department options
 const departmentOptions = [
   { value: 'Full Stack', label: 'Full Stack' },
   { value: 'AI and Data', label: 'AI and Data' },
@@ -27,7 +27,7 @@ export default function ProjectManager() {
   const [formError, setFormError] = useState('');
   const [analysisResult, setAnalysisResult] = useState<any | null>(null);
   const { sendRequest, loading, httpError } = HttpHook();
-
+  const navigate = useNavigate();
   
   
   
@@ -126,70 +126,26 @@ export default function ProjectManager() {
       return;
     }
   
-    // Create team roles object (level: department)
-    const team_roles: Record<string, string> = {};
-    teamMembers.forEach(member => {
-      team_roles[member.level] = member.department;
-    });
-  
-    // Prepare project data
     const projectData: any = {
       project_name: projectName,
       project_description: projectDescription,
-      team_roles: teamMembers
+      team_roles: teamMembers,
     };
   
-    // Log the form data to the console
-    console.log('Form Data:', projectData);
-  
     try {
-
-      // Send request using fetch
-      // const res = await fetch(BACKEND_URL, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: projectData
-      // });
-      
-      // if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-
-      // const data = await res.json(); 
-      // console.log('Success:', data);
-
-      // Send request using httphook
       const response = await sendRequest<any>({
-        method: 'post', 
-        url: `${BACKEND_URL}/ai/generate`,
-        body: projectData
+        method: 'post',
+        url: `${BACKEND_URL}/projects`,
+        body: projectData,
       });
-      console.log("response from API called via HttpHook");
-      console.log(response);
-      
-      // with MOCK DATA
-      
-      // const result = await submitProjectMock(projectData);
-      // console.log("Mock response from API");
-      // console.log(result);
-
-      // const data = {
-      //   generated_plan: response
-      // }
-      // const data = response;
-
-      // console.log("Data from API call to generate project: ");
-      // console.log(data);
-      
+  
       if (response) {
-        
-        setAnalysisResult(response);
-        
-        console.log("Analysis Result:", analysisResult);
+        console.log('Project created successfully:', response);
+        navigate('/projects'); // Navigate to the Projects page after successful submission
       }
     } catch (error) {
       console.error('Error submitting project:', error);
-      setFormError('Failed to analyze project. Please try again later.');
+      setFormError('Failed to create project. Please try again later.');
     }
   };
   

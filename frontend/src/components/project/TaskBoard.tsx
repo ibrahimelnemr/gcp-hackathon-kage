@@ -3,13 +3,8 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, ChevronLeft, Clock, CheckCircle, Circle } from 'lucide-react';
+import { Task } from '@/data/Interfaces';
 
-interface Task {
-  task_id: number;
-  description: string;
-  status: "to-do" | "in-progress" | "done";
-  employee_name: string;
-}
 
 interface TaskBoardProps {
   tasks: Task[];

@@ -23,9 +23,8 @@ class Task(BaseModel):
     """Represents a single, concise task derived from the project description."""
     task_id: int = Field(description="A unique sequential identifier for the task.")
     description: str = Field(description="A clear and concise description of the task, suitable for one person to work on.")
-    assigned_role_experience: str = Field(description="The experience level of the team member best suited for this task (e.g., Analyst, Consultant, Senior Consultant). Must match one of the keys in the input roles dictionary.")
-    assigned_role_department: str = Field(description="The department of the team member best suited for this task (e.g., AI and Data, Cloud, Fullstack). Must match the department associated with the assigned experience level in the input roles dictionary.")
-    rationale: str = Field(description="Brief justification for assigning this task to the specified role experience and department and why this specified role experience **and** department is best suited for")
+    employee_temp_id: int = Field(description="A temporary identifier for the employee assigned to this task.")
+    project_temp_id: int = Field(description="A temporary identifier for the project this task belongs to.")
 
 class MissingRole(BaseModel):
     """Represents a role deemed missing for optimal project execution."""
@@ -159,25 +158,12 @@ class Kage:
 
             2.  **Assign Decomposed Tasks to Available Roles:**
                 *   Now, take the list of tasks created in Step 1.
-                *   For *each* task, attempt to assign it to the *most suitable* team member profile from the 'Available Team Roles' list (anything to do with data extraction or AI should be assigned to AI and Data for example).
-                *   Base the assignment on the task's nature, its inferred skill requirements, and the 'Experience Level Guidelines' provided above.
+                *   For *each* task, attempt to assign it to the *most suitable* team member profile from the 'Available Team Roles' list.
                 *   Use the exact Name, Level, and Department strings from the 'Available Team Roles' when assigning.
-                *   Provide a 'rationale' for each task assignment, explaining *why* that specific role profile is the best fit from the available options, or noting if the fit isn't perfect but is the closest available.
+                *   Assign a temporary employee ID (`employee_temp_id`) to each team member and include it in the task assignment.
+                *   Assign a temporary project ID (`project_temp_id`) to all tasks.
 
-            3.  **Identify Missing Roles, Skills, Oversight, and Workload Gaps:**
-                *   Analyze the task list (Step 1) and assignments (Step 2) against 'Available Team Roles'.
-                *   **(a) Skill/Department Gaps:** Identify critical skills/departments needed for tasks but completely absent in the team. Recommend adding appropriate roles (Name, Level, Department).
-                *   **(b) Oversight Gaps:** Verify required Senior Consultant (or higher) oversight for departments with assigned Analysts/Consultants. If missing, recommend adding a 'Senior Consultant' for that department, noting the Consultant alternative if applicable (needs confirmation).
-                *   **(c) Workload Imbalance Analysis:**
-                    i.  **Count Tasks per Unique Role:** For each unique role key in 'Available Team Roles', count how many tasks were assigned to it in Step 2.
-                    ii. **Identify Potential Overload:** Pay close attention to any unique role key assigned a high number of tasks - **consider 2 or more tasks as potentially high load**, adjust based on task nature. Also consider if a junior role (Analyst) is assigned many complex tasks. **No analyst should have more than 2 tasks** so suggest more analysts if need be.
-                    iii.**Check for Reassignment:** Before recommending new hires *purely* for workload, check: Could any tasks assigned to an identified overloaded role be *reasonably* reassigned to another *existing* unique role key that has significantly fewer tasks assigned, even if the skill fit is slightly less perfect? Note this possibility if applicable.
-                    iv. **Recommend Additions for Workload:** If reassignment is not feasible or insufficient, and a role/department remains overloaded (based on task count or complexity for role level), **recommend adding another specific role** (typically 'Analyst' or 'Consultant') to that department.
-                    v.  **Mandatory Reasoning:** The 'reasoning' for any role recommended *due to workload* **must explicitly state** "Workload balancing for [Department Name]", mention the overloaded role(s) (e.g., "to support [Unique Role Key]"), and ideally reference the high task count (e.g., "due to high task count assigned"). If suggesting reassignment was considered, mention that briefly in the reasoning for adding the new role (e.g., "...reassignment insufficient").
-                *   Combine all findings (a, b, c) into the `missing_roles` list. Provide clear 'reasoning' for each suggestion per the instructions.
-                *   If no gaps found, provide an empty list for `missing_roles`.
-
-            4.  **Output Format:** Structure your entire response strictly as a JSON object conforming to the following schema. Do **not** include any text outside the JSON structure.
+            3.  **Output Format:** Structure your entire response strictly as a JSON object conforming to the following schema. Do **not** include any text outside the JSON structure.
 
             **Output JSON Schema:**
             {format_instructions}
@@ -267,25 +253,29 @@ class Kage:
             response_content = self.generate_kage_response(model, prompt, logger)
             project_plan_obj = self.parse_kage_response(response_content, logger)
 
-            # Format employees correctly
+            # Assign temporary IDs to employees
             employees = [
-                {"name": role["name"], "level": role["level"], "department": role["department"]}
-                for role in team_roles
+                {"employee_temp_id": idx + 1, "name": role["name"], "level": role["level"], "department": role["department"]}
+                for idx, role in enumerate(team_roles)
             ]
 
-            # Format tasks correctly
+            # Assign a temporary project ID
+            project_temp_id = 1  # Since there's only one project, we use a static temp ID
+
+            # Format tasks correctly with temporary IDs
             tasks = [
                 {
+                    "task_id": task.task_id,
                     "description": task.description,
-                    "status": "pending",  # Default status
-                    "assigned_role_experience": task.assigned_role_experience,
-                    "assigned_role_department": task.assigned_role_department,
+                    "employee_temp_id": task.employee_temp_id,
+                    "project_temp_id": project_temp_id,
                 }
                 for task in project_plan_obj.tasks
             ]
 
             # Format project details
             project = {
+                "project_temp_id": project_temp_id,
                 "name": project_name,
                 "description": project_description,
             }

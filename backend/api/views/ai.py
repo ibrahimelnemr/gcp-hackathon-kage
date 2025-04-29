@@ -41,12 +41,12 @@ def generate_project_plan(request):
             "End Date: June 2025"
         )
         default_team_roles = [
-            {"name": "Analyst 1", "level": "Analyst", "department": "AI and Data"},
-            {"name": "Senior Consultant 1", "level": "Senior Consultant", "department": "AI and Data"},
-            {"name": "Consultant 1", "level": "Consultant", "department": "Cloud"},
-            {"name": "Senior Consultant 2", "level": "Senior Consultant", "department": "Cloud"},
-            {"name": "Analyst 2", "level": "Analyst", "department": "Fullstack"},
-            {"name": "Senior Consultant 3", "level": "Senior Consultant", "department": "Fullstack"},
+            {"name": "John", "level": "Analyst", "department": "AI and Data"},
+            {"name": "Jane", "level": "Senior Consultant", "department": "AI and Data"},
+            {"name": "Appleseed", "level": "Consultant", "department": "Cloud"},
+            {"name": "Bartholomew", "level": "Senior Consultant", "department": "Cloud"},
+            {"name": "Alice", "level": "Analyst", "department": "Fullstack"},
+            {"name": "Frank", "level": "Senior Consultant", "department": "Fullstack"},
         ]
 
         # Use provided data or fallback to defaults
@@ -62,7 +62,7 @@ def generate_project_plan(request):
 
         # Initialize the Kage class and generate the project plan
         kage = Kage()
-        project_plan = kage.generate_project_plan(
+        kage_project_plan = kage.generate_project_plan(
             project_name=project_name,
             project_description=project_description,
             team_roles=team_roles
@@ -72,24 +72,24 @@ def generate_project_plan(request):
         project = Project.objects.create(name=project_name, description=project_description)
 
         # Create employees based on team_roles
-        employees = {}
         for role in team_roles:
-            employee = Employee.objects.create(
+            Employee.objects.create(
                 name=role["name"],
                 level=role["level"],
                 department=role["department"]
             )
-            employees[role["name"]] = employee
 
         # Create tasks based on the project plan
-        for task in project_plan.get("tasks", []):
-            assigned_role = task.get("assigned_role_experience")  # Get the role assigned to the task
-            assigned_employee = employees.get(assigned_role)  # Find the employee for the role
+        for task in kage_project_plan.get("tasks", []):
+            employee_name = task.get("employee_name")  # Get the employee name from the task
+            assigned_employee = Employee.objects.filter(name=employee_name).first()  # Fetch the employee by name
+
             if not assigned_employee:
-                print(f"Warning: No employee found for role {assigned_role}")  # Debugging log
+                print(f"Warning: No employee found with name {employee_name}")  # Debugging log
+
             Task.objects.create(
                 project=project,
-                employee=assigned_employee,  # Assign the correct employee
+                employee=assigned_employee,  # Associate the employee with the task
                 description=task.get("description", ""),
                 status="pending"  # Default status
             )

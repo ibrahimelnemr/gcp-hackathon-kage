@@ -156,7 +156,7 @@ export default function ProjectManager() {
     const projectData: any = {
       project_name: projectName,
       project_description: projectDescription,
-      team_members: teamMembers // Include the array of team members
+      team_roles: teamMembers // Include the array of team members
     };
   
     // Log the form data to the console

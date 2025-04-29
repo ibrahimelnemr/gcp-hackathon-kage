@@ -83,10 +83,9 @@ export default function ProjectManager() {
   };
 
   async function submitProjectMock(projectData: any): Promise<any> {
-
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     // Mock response data
     return {
       generated_plan: {
@@ -94,48 +93,29 @@ export default function ProjectManager() {
           {
             task_id: 1,
             description: "Run Axe accessibility scan on the portal.",
-            assigned_role_experience: "Senior Consultant",
-            assigned_role_department: "Accessibility",
-            rationale: "Needs accessibility expertise to configure tool and interpret results."
+            status: "to-do",
+            employee_name: "John Doe"
           },
           {
             task_id: 2,
             description: "Review login flow for keyboard navigation issues.",
-            assigned_role_experience: "Senior Consultant",
-            assigned_role_department: "Accessibility",
-            rationale: "Requires manual accessibility testing experience."
+            status: "in-progress",
+            employee_name: "Jane Smith"
           },
           {
             task_id: 3,
             description: "Review dashboard for screen reader compatibility.",
-            assigned_role_experience: "Senior Consultant",
-            assigned_role_department: "Accessibility",
-            rationale: "Expertise with screen readers is essential."
+            status: "done",
+            employee_name: "Alice Johnson"
           },
           {
             task_id: 4,
             description: "Identify color contrast issues across the portal.",
-            assigned_role_experience: "Senior Consultant",
-            assigned_role_department: "Accessibility",
-            rationale: "Visual accessibility expertise required."
-          }
-        ],
-        missing_roles: [
-          {
-            experience: "Consultant",
-            department: "Fullstack",
-            reasoning: "Helps with workload and React-specific tasks."
+            status: "to-do",
+            employee_name: "Frank Brown"
           }
         ]
-      },
-      // Legacy format support
-      memberTasks: [],
-      timeline: {
-        startDate: new Date().toISOString(),
-        endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-        milestones: []
-      },
-      recommendations: []
+      }
     };
   }
   
@@ -156,7 +136,7 @@ export default function ProjectManager() {
     const projectData: any = {
       project_name: projectName,
       project_description: projectDescription,
-      team_roles: teamMembers // Include the array of team members
+      team_roles: teamMembers
     };
   
     // Log the form data to the console
@@ -189,17 +169,23 @@ export default function ProjectManager() {
       
       // with MOCK DATA
       
-      // const result = await submitProjectMock(projectData);
+      const result = await submitProjectMock(projectData);
+      console.log("Mock response from API");
+      console.log(result);
 
-      const data = {
-        generated_plan: response
-      }
+      // const data = {
+      //   generated_plan: response
+      // }
+      // const data = response;
 
-      console.log("Data from API call to generate project: ");
-      console.log(data);
+      // console.log("Data from API call to generate project: ");
+      // console.log(data);
       
       if (response) {
-        setAnalysisResult(data);
+        
+        setAnalysisResult(response);
+        
+        console.log("Analysis Result:", analysisResult);
       }
     } catch (error) {
       console.error('Error submitting project:', error);
@@ -376,12 +362,13 @@ export default function ProjectManager() {
             </CardHeader>
             <CardContent className="space-y-8">
               {/* Task Board */}
+              
               {analysisResult.generated_plan && (
                 <TaskBoard 
                   tasks={analysisResult.generated_plan.tasks} 
-                  missingRoles={analysisResult.generated_plan.missing_roles} 
                 />
               )}
+            
               
               {/* Display legacy format if new format is not available */}
               {!analysisResult.generated_plan && analysisResult.memberTasks && (

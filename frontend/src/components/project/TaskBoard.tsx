@@ -9,8 +9,6 @@ interface Task {
   description: string;
   status: "to-do" | "in-progress" | "done";
   employee_name: string;
-  employee_level: string;
-  employee_department: string;
 }
 
 interface TaskBoardProps {
@@ -79,11 +77,7 @@ export function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
               </CardHeader>
               <CardContent>
                 <p className="text-sm mb-3">{task.description}</p>
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{task.employee_name}</span>
-                  <span>{task.employee_level}</span>
-                  <span>{task.employee_department}</span>
-                </div>
+                <div className="text-xs text-muted-foreground">{task.employee_name}</div>
               </CardContent>
             </Card>
           ))}
@@ -124,11 +118,7 @@ export function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
               </CardHeader>
               <CardContent>
                 <p className="text-sm mb-3">{task.description}</p>
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{task.employee_name}</span>
-                  <span>{task.employee_level}</span>
-                  <span>{task.employee_department}</span>
-                </div>
+                <div className="text-xs text-muted-foreground">{task.employee_name}</div>
               </CardContent>
             </Card>
           ))}
@@ -159,11 +149,7 @@ export function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
               </CardHeader>
               <CardContent>
                 <p className="text-sm mb-3">{task.description}</p>
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{task.employee_name}</span>
-                  <span>{task.employee_level}</span>
-                  <span>{task.employee_department}</span>
-                </div>
+                <div className="text-xs text-muted-foreground">{task.employee_name}</div>
               </CardContent>
             </Card>
           ))}

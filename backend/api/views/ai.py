@@ -91,11 +91,11 @@ def generate_project_plan(request):
                 project=project,
                 employee=assigned_employee,  # Associate the employee with the task
                 description=task.get("description", ""),
-                status="pending"  # Default status
+                status="to-do"
             )
 
         # Return the generated project plan as a JSON response
-        return JsonResponse(kage_project_plan, safe=False, status=200)
+        return JsonResponse({"generated_plan": kage_project_plan}, safe=False, status=200)
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)

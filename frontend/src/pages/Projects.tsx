@@ -11,8 +11,6 @@ interface Task {
   status: string;
   description: string;
   employee_name: string | null;
-  employee_level: string | null;
-  employee_department: string | null;
 }
 
 interface Project {
@@ -38,57 +36,41 @@ export default function Projects() {
               status: "pending",
               description: "Prepare documentation and training materials for the proof-of-concept demonstration.",
               employee_name: "John Doe",
-              employee_level: "Senior Developer",
-              employee_department: "Documentation",
             },
             {
               status: "in-progress",
               description: "Develop the backend API to connect the frontend with the AI agent and AWS services.",
-              employee_name: "Jane Smith",
-              employee_level: "Backend Engineer",
-              employee_department: "Backend Development",
+              employee_name: "Jane Smith"
             },
             {
               status: "completed",
               description: "Develop the frontend UI for user interaction and display of results.",
               employee_name: "Alice Johnson",
-              employee_level: "Frontend Engineer",
-              employee_department: "Frontend Development",
             },
             {
               status: "pending",
               description: "Integrate the AI agent with the AWS infrastructure.",
-              employee_name: "Bob Brown",
-              employee_level: "Cloud Engineer",
-              employee_department: "Cloud Infrastructure",
+              employee_name: "Bob Brown"
             },
             {
               status: "in-progress",
               description: "Set up AWS infrastructure for the project (e.g., compute, storage, networking).",
               employee_name: "Charlie Green",
-              employee_level: "Cloud Architect",
-              employee_department: "Cloud Infrastructure",
             },
             {
               status: "pending",
               description: "Develop the proposal generation functionality based on comparison results.",
               employee_name: "Diana White",
-              employee_level: "AI Specialist",
-              employee_department: "AI Development",
             },
             {
               status: "pending",
               description: "Design and implement the contract comparison logic against a template using Azure OpenAI.",
               employee_name: "Eve Black",
-              employee_level: "AI Engineer",
-              employee_department: "AI Development",
             },
             {
               status: "completed",
               description: "Develop text extraction functionality from Word documents using Azure OpenAI.",
               employee_name: "Frank Blue",
-              employee_level: "AI Developer",
-              employee_department: "AI Development",
             },
           ],
         },

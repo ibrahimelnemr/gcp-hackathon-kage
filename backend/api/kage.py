@@ -248,6 +248,7 @@ class Kage:
                     "task_id": task.task_id,
                     "description": task.description,
                     "employee_name": task.employee_name,
+                    "status": "to-do",
                 }
                 for task in project_plan_obj.tasks
             ]

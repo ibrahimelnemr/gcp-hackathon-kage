@@ -45,8 +45,11 @@ To run the app itself:
 To run an interactive terminal development:
 `docker run -it --rm -p 5173:5173 -v "$(pwd)":/app -w /app kage-frontend bash`
 
-To run the app itself:
+Run the app itself (background)
 `docker run -d -p 5173:5173 -v "$(pwd)":/app -w /app kage-frontend`
+
+To run the app itself in terminal, remove container when finished
+`docker run --rm -it -p 5173:5173 -v "$(pwd)":/app -w /app kage-frontend`
 
 
 ## Database schema

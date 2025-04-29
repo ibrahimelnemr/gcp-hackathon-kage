@@ -1,7 +1,7 @@
 # gcp-hackathon-kage
 AI powered project management tool built for the Google Cloud Platform hackathon.
 
-## Local development setup
+## Backend - local development (venv)
 
 To set up the python environment locally
 
@@ -20,29 +20,28 @@ Then to run the django app
 
 `python manage.py runserver 0.0.0.0:8080`
 
-Alternately, to set up with docker
+## Backend - local development (docker)
 
 `cd gcp-hackathon-kage`
 
-`cd backend_django`
+`cd backend`
 
-`docker build -t kage-backend-django .`
+`docker build -t kage-backend .`
 
-Then to run an interactive terminal for development run:
-`docker run -it --rm -p 8080:8080 -v "$(pwd)":/app -w /app kage-backend-django bash`
+To run an interactive terminal development:
+`docker run -it --rm -p 8080:8080 -v "$(pwd)":/app -w /app kage-backend bash`
 
-Alternately to run the app itself run
-
-`docker run -d -p 8080:8080 -v "$(pwd)":/app -w /app my-python-app`
+To run the app itself:
+`docker run -d -p 8080:8080 -v "$(pwd)":/app -w /app kage-backend`
 
 ## Database schema
 
 ## Connect to vertex AI
 
-in the `backend_django` root folder add the credentials file `centered-accord-442214-b9-12a090e7cfac.json`
+in the `backend` root folder add the credentials file `centered-accord-442214-b9-89fe65beac89.json`
 
 add a `.env` file in the `backend_django` root folder and set
-`GOOGLE_APPLICATION_CREDENTIALS=centered-accord-442214-b9-12a090e7cfac.json`
+`GOOGLE_APPLICATION_CREDENTIALS=centered-accord-442214-b9-89fe65beac89.json`
 
 ## Django development
 

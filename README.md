@@ -77,6 +77,16 @@ For frontend
 
 `docker push ibrahimelnemr/kage-frontend:latest`
 
+## Frontend deployment / environment variables
+
+by default the frontend will assume the backend url is http://localhost:8080
+
+however, for running in production with a different backend ensure to pass an environment variable using `-e` specifying the url at runtime
+
+this will generate a .env file in the frontend folder with the correct backend url
+
+`docker run -p 5173:5173 --rm -e BACKEND_URL=http://localhost:5050 ibrahimelnemr/kage-frontend:latest`
+
 ## Database schema
 
 Employee

@@ -1,5 +1,8 @@
 FROM node:latest
 
+# Install envsubst (part of gettext package)
+RUN apt-get update && apt-get install -y gettext
+
 WORKDIR /app
 
 COPY package*.json ./
@@ -19,4 +22,6 @@ COPY . .
 
 EXPOSE 5173
 
-CMD ["npm", "run", "dev"]
+# CMD ["npm", "run", "dev"]
+
+CMD ["sh", "-c", "envsubst < /app/.env.template > /app/.env && npm run dev"]

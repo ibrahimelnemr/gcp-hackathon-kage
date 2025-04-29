@@ -169,9 +169,9 @@ export default function ProjectManager() {
       
       // with MOCK DATA
       
-      const result = await submitProjectMock(projectData);
-      console.log("Mock response from API");
-      console.log(result);
+      // const result = await submitProjectMock(projectData);
+      // console.log("Mock response from API");
+      // console.log(result);
 
       // const data = {
       //   generated_plan: response

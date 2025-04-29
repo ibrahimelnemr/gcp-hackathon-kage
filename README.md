@@ -55,6 +55,28 @@ then within the terminal, run `npm run dev`
 Run app
 `docker run -p 5173:5173 kage-frontend`
 
+## Push to docker registry for deployment
+
+For backend
+
+`cd backend`
+
+`docker build -t kage-backend:latest .`
+
+`docker tag kage-backend ibrahimelnemr/kage-backend:latest`
+
+`docker push ibrahimelnemr/kage-backend:latest`
+
+For frontend
+
+`cd frontend`
+
+`docker build -t kage-frontend .`
+
+`docker tag kage-frontend ibrahimelnemr/kage-frontend:latest`
+
+`docker push ibrahimelnemr/kage-frontend:latest`
+
 ## Database schema
 
 Employee

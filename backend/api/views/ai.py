@@ -95,7 +95,7 @@ def generate_project_plan(request):
             )
 
         # Return the generated project plan as a JSON response
-        return JsonResponse(project_plan, safe=False, status=200)
+        return JsonResponse(kage_project_plan, safe=False, status=200)
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)

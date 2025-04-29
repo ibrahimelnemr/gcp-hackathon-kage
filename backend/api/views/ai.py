@@ -40,14 +40,14 @@ def generate_project_plan(request):
             "Goal: Demonstrable proof-of-concept for company to test.\n"
             "End Date: June 2025"
         )
-        default_team_roles = {
-            "Analyst 1": "AI and Data",
-            "Senior Consultant 1": "AI and Data",
-            "Consultant 1": "Cloud",
-            "Senior Consultant 2": "Cloud",
-            "Analyst 2": "Fullstack",
-            "Senior Consultant 3": "Fullstack",
-        }
+        default_team_roles = [
+            {"name": "Analyst 1", "level": "Analyst", "department": "AI and Data"},
+            {"name": "Senior Consultant 1", "level": "Senior Consultant", "department": "AI and Data"},
+            {"name": "Consultant 1", "level": "Consultant", "department": "Cloud"},
+            {"name": "Senior Consultant 2", "level": "Senior Consultant", "department": "Cloud"},
+            {"name": "Analyst 2", "level": "Analyst", "department": "Fullstack"},
+            {"name": "Senior Consultant 3", "level": "Senior Consultant", "department": "Fullstack"},
+        ]
 
         # Use provided data or fallback to defaults
         project_name = data.get("project_name", default_project_name)
@@ -55,8 +55,10 @@ def generate_project_plan(request):
         team_roles = data.get("team_roles", default_team_roles)
 
         # Validate team_roles format
-        if not isinstance(team_roles, dict):
-            return JsonResponse({"error": "'team_roles' must be a dictionary."}, status=400)
+        if not isinstance(team_roles, list) or not all(
+            isinstance(role, dict) and {"name", "level", "department"}.issubset(role) for role in team_roles
+        ):
+            return JsonResponse({"error": "'team_roles' must be a list of objects with 'name', 'level', and 'department'."}, status=400)
 
         # Initialize the Kage class and generate the project plan
         kage = Kage()
@@ -71,9 +73,13 @@ def generate_project_plan(request):
 
         # Create employees based on team_roles
         employees = {}
-        for role, department in team_roles.items():
-            employee = Employee.objects.create(name=role, level=role, department=department)
-            employees[role] = employee
+        for role in team_roles:
+            employee = Employee.objects.create(
+                name=role["name"],
+                level=role["level"],
+                department=role["department"]
+            )
+            employees[role["name"]] = employee
 
         # Create tasks based on the project plan
         for task in project_plan.get("tasks", []):

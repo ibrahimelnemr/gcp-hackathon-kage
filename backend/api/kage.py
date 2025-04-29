@@ -101,13 +101,16 @@ class Kage:
             logger.error(f"Failed to initialize Vertex AI client: {e}")
             raise
 
-    def create_kage_prompt(self, project_description: str, team_roles: Dict[str, str], logger: logging.Logger) -> str:
+    def create_kage_prompt(self, project_description: str, team_roles: List[Dict[str, str]], logger: logging.Logger) -> str:
         logger.info("Creating KAGE project plan prompt")
         logger.info(team_roles)
 
         parser = PydanticOutputParser(pydantic_object=ProjectPlan)
 
-        formatted_roles = "\n".join([f"- {exp}: {dep}" for exp, dep in team_roles.items()])
+        # Format team_roles as a list of strings
+        formatted_roles = "\n".join(
+            [f"- {role['name']} (Level: {role['level']}, Department: {role['department']})" for role in team_roles]
+        )
         if not formatted_roles:
             formatted_roles = "No team roles provided."
 
@@ -143,8 +146,7 @@ class Kage:
 
             {experience_definitions}
 
-            **Available Team Roles (Experience: Department):**
-            (**IMPORTANT:** Team roles may include a number at the end (such as Analyst 1 or Consultant 2) in order for the dictionary to distinguish between the titles. Treat the roles as if they do not have a number at the end.)
+            **Available Team Roles (Name, Level, Department):**
             {team_roles}
 
             **Instructions - Follow these steps SEQUENTIALLY:**
@@ -159,12 +161,12 @@ class Kage:
                 *   Now, take the list of tasks created in Step 1.
                 *   For *each* task, attempt to assign it to the *most suitable* team member profile from the 'Available Team Roles' list (anything to do with data extraction or AI should be assigned to AI and Data for example).
                 *   Base the assignment on the task's nature, its inferred skill requirements, and the 'Experience Level Guidelines' provided above.
-                *   Use the exact Experience and Department strings from the 'Available Team Roles' when assigning.
+                *   Use the exact Name, Level, and Department strings from the 'Available Team Roles' when assigning.
                 *   Provide a 'rationale' for each task assignment, explaining *why* that specific role profile is the best fit from the available options, or noting if the fit isn't perfect but is the closest available.
 
             3.  **Identify Missing Roles, Skills, Oversight, and Workload Gaps:**
                 *   Analyze the task list (Step 1) and assignments (Step 2) against 'Available Team Roles'.
-                *   **(a) Skill/Department Gaps:** Identify critical skills/departments needed for tasks but completely absent in the team. Recommend adding appropriate roles (Experience Level + Department).
+                *   **(a) Skill/Department Gaps:** Identify critical skills/departments needed for tasks but completely absent in the team. Recommend adding appropriate roles (Name, Level, Department).
                 *   **(b) Oversight Gaps:** Verify required Senior Consultant (or higher) oversight for departments with assigned Analysts/Consultants. If missing, recommend adding a 'Senior Consultant' for that department, noting the Consultant alternative if applicable (needs confirmation).
                 *   **(c) Workload Imbalance Analysis:**
                     i.  **Count Tasks per Unique Role:** For each unique role key in 'Available Team Roles', count how many tasks were assigned to it in Step 2.
@@ -238,7 +240,7 @@ class Kage:
             logger.error(f"Failed to parse the model response: {e}")
             raise ValueError(f"Failed to parse the model response into ProjectPlan structure. Error: {e}")
 
-    def generate_project_plan(self, project_name: str, project_description: str, team_roles: Dict[str, str]) -> Dict:
+    def generate_project_plan(self, project_name: str, project_description: str, team_roles: List[Dict[str, str]]) -> Dict:
         logger, log_file = self.setup_logging(project_name)
         logger.info(f"Starting KAGE project plan generation for: {project_name}")
         start_time = time.time()
@@ -246,9 +248,15 @@ class Kage:
         if not project_description:
             logger.error("Project description cannot be empty.")
             raise ValueError("Project description cannot be empty.")
-        if not isinstance(team_roles, dict):
-            logger.error("Team roles must be a dictionary.")
-            raise ValueError("Team roles must be a dictionary.")
+        if not isinstance(team_roles, list):
+            logger.error("Team roles must be a list of objects.")
+            raise ValueError("Team roles must be a list of objects.")
+
+        # Validate team_roles format
+        for role in team_roles:
+            if not all(key in role for key in ["name", "level", "department"]):
+                logger.error("Each team role must have 'name', 'level', and 'department' fields.")
+                raise ValueError("Each team role must have 'name', 'level', and 'department' fields.")
 
         output_dir = "output_plans"
         os.makedirs(output_dir, exist_ok=True)
@@ -259,20 +267,39 @@ class Kage:
             response_content = self.generate_kage_response(model, prompt, logger)
             project_plan_obj = self.parse_kage_response(response_content, logger)
 
-            result_dict = project_plan_obj.model_dump()
+            # Format employees correctly
+            employees = [
+                {"name": role["name"], "level": role["level"], "department": role["department"]}
+                for role in team_roles
+            ]
 
+            # Format tasks correctly
+            tasks = [
+                {
+                    "description": task.description,
+                    "status": "pending",  # Default status
+                    "assigned_role_experience": task.assigned_role_experience,
+                    "assigned_role_department": task.assigned_role_department,
+                }
+                for task in project_plan_obj.tasks
+            ]
+
+            # Format project details
+            project = {
+                "name": project_name,
+                "description": project_description,
+            }
+
+            final_output_data = {
+                "project": project,
+                "employees": employees,
+                "tasks": tasks,
+            }
+
+            # Save the output to a file
             timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
             output_filename = f"plan_{project_name.replace(' ', '_')}_{timestamp}.json"
             output_filepath = os.path.join(output_dir, output_filename)
-
-            final_output_data = {
-                "input_parameters": {
-                    "project_name": project_name,
-                    "project_description": project_description,
-                    "team_roles": team_roles
-                },
-                "generated_plan": result_dict
-            }
 
             with open(output_filepath, 'w', encoding='utf-8') as f:
                 json.dump(final_output_data, f, indent=4, ensure_ascii=False)
@@ -282,7 +309,7 @@ class Kage:
             logger.info(f"KAGE project plan generation completed in {end_time - start_time:.2f} seconds.")
             logger.info(f"Log file saved to: {log_file}")
 
-            return result_dict
+            return final_output_data
         except Exception as e:
             logger.error(f"KAGE project plan generation failed: {str(e)}")
             raise ValueError(f"KAGE project plan generation failed: {str(e)}")

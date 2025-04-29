@@ -15,7 +15,7 @@ export default function ProjectTaskBoard() {
           Back to Projects
         </Button>
       </div>
-      <TaskBoard tasks={project.tasks} missingRoles={[]} />
+      <TaskBoard tasks={project.tasks} />
     </div>
   );
 }

@@ -127,38 +127,3 @@ def ai_chat(request):
         # return Response({"error": str(e)}, status=500)
         return JsonResponse({"error": str(e)}, status=500)
 
-@api_view(['GET'])
-def get_projects(request):
-    try:
-        # Fetch all projects
-        projects = Project.objects.all()
-
-        # Prepare the response data
-        response_data = []
-        for project in projects:
-            # Fetch tasks related to the project
-            tasks = Task.objects.filter(project=project).select_related('employee')
-
-            # Prepare task details
-            task_list = []
-            for task in tasks:
-                task_list.append({
-                    "status": task.status,
-                    "description": task.description,
-                    "employee_name": task.employee.name if task.employee else None,
-                    "employee_level": task.employee.level if task.employee else None,
-                    "employee_department": task.employee.department if task.employee else None,
-                })
-
-            # Add project details to the response
-            response_data.append({
-                "project_name": project.name,
-                "project_description": project.description,
-                "tasks": task_list
-            })
-
-        # Return the response as JSON
-        return JsonResponse(response_data, safe=False, status=200)
-
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)

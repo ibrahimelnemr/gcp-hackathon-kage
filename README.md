@@ -38,6 +38,8 @@ To run the app itself:
 
 ## Frontend - local development (docker)
 
+Note that if no backend URL is passed via `-e BACKEND_URL=http://enter-backend-url-here` it will assumed to be localhost:8080
+
 `cd gcp-hackathon-kage`
 
 `cd frontend`
@@ -45,10 +47,10 @@ To run the app itself:
 `docker build -t kage-frontend .`
 
 Run the app itself (terminal), remove container when finished to view/test app
-`docker run --rm -it -p 5173:5173 kage-frontend`
+`docker run --rm -it -p 5173:5173 -e BACKEND_URL=http://enter-backend-url-here kage-frontend`
 
 Run the app itself in terminal, remove container when finished, allow for local development, include container node modules not local
-`docker run --rm -it -p 5173:5173 -v "$(pwd)":/app -v kage-frontend_node_modules:/app/node_modules -w /app kage-frontend bash`
+`docker run --rm -it -p 5173:5173 -e BACKEND_URL=http://enter-backend-url-here -v "$(pwd)":/app -v kage-frontend_node_modules:/app/node_modules -w /app kage-frontend bash`
 
 then within the terminal, run `npm run dev`
 
@@ -124,6 +126,14 @@ add a `.env` file in the `backend_django` root folder and set
 `python manage.py runserver 0.0.0.0:8080`
 
 `python manage.py test`
+
+## GCP deployment
+
+specify the container as
+
+`docker.io/ibrahimelnemr/kage-backend:latest`
+
+`docker.io/ibrahimelnemr/kage-frontend:latest`
 
 ## Troubleshooting
 

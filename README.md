@@ -46,7 +46,7 @@ Run the app itself (terminal), remove container when finished to view/test app
 `docker run --rm -it -p 5173:5173 kage-frontend`
 
 Run the app itself in terminal, remove container when finished, allow for local development, include container node modules not local
-`docker run --rm -it -p 5173:5173 -v "$(pwd)":/app -v kage-frontend_node_modules:/app/node_modules -w /app kage-frontend`
+`docker run --rm -it -p 5173:5173 -v "$(pwd)":/app -v kage-frontend_node_modules:/app/node_modules -w /app kage-frontend bash`
 
 Run app
 `docker run -p 5173:5173 kage-frontend`

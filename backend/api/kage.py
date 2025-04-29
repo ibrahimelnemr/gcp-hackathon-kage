@@ -23,19 +23,11 @@ class Task(BaseModel):
     """Represents a single, concise task derived from the project description."""
     task_id: int = Field(description="A unique sequential identifier for the task.")
     description: str = Field(description="A clear and concise description of the task, suitable for one person to work on.")
-    employee_temp_id: int = Field(description="A temporary identifier for the employee assigned to this task.")
-    project_temp_id: int = Field(description="A temporary identifier for the project this task belongs to.")
-
-class MissingRole(BaseModel):
-    """Represents a role deemed missing for optimal project execution."""
-    experience: str = Field(description="The suggested experience level for the missing role (e.g., Senior Consultant, Manager).")
-    department: str = Field(description="The suggested department specialization for the missing role (e.g., Cybersecurity, UX/UI Design, DevOps).")
-    reasoning: str = Field(description="Explanation why this role is needed for the project.")
+    employee_name: str = Field(description="The name of the employee assigned to this task.")
 
 class ProjectPlan(BaseModel):
-    """The overall project plan containing tasks and identified missing roles."""
+    """The overall project plan containing tasks."""
     tasks: List[Task] = Field(description="A list of all the broken-down project tasks.")
-    missing_roles: List[MissingRole] = Field(description="A list of roles identified as potentially missing from the team for this project.", default=[])
 
     @field_validator('tasks')
     @classmethod
@@ -43,8 +35,6 @@ class ProjectPlan(BaseModel):
         if not tasks_value:
             raise ValueError("The list of tasks cannot be empty.")
         return tasks_value
-
-
 
 class Kage:
     def __init__(self):
@@ -138,7 +128,7 @@ class Kage:
 
         prompt_template = PromptTemplate(
             template="""
-            You are KAGE, an expert project management assistant. Your goal is to create a structured project plan by first decomposing the work, then assigning it to the available team, and finally identifying any gaps including workload imbalances.
+            You are KAGE, an expert project management assistant. Your goal is to create a structured project plan.
 
             **Project Description:**
             {project_description}
@@ -167,7 +157,6 @@ class Kage:
 
             **Output JSON Schema:**
             {format_instructions}
-
             Generate the project plan now.
             """,
             input_variables=["project_description", "team_roles"],
@@ -220,7 +209,7 @@ class Kage:
             json_str = match.group(0) if match else cleaned_response
 
             parsed_plan = parser.parse(json_str)
-            logger.info(f"Successfully parsed KAGE plan with {len(parsed_plan.tasks)} tasks and {len(parsed_plan.missing_roles)} missing roles identified.")
+            logger.info(f"Successfully parsed KAGE plan with {len(parsed_plan.tasks)} tasks.")
             return parsed_plan
         except Exception as e:
             logger.error(f"Failed to parse the model response: {e}")
@@ -253,36 +242,19 @@ class Kage:
             response_content = self.generate_kage_response(model, prompt, logger)
             project_plan_obj = self.parse_kage_response(response_content, logger)
 
-            # Assign temporary IDs to employees
-            employees = [
-                {"employee_temp_id": idx + 1, "name": role["name"], "level": role["level"], "department": role["department"]}
-                for idx, role in enumerate(team_roles)
-            ]
-
-            # Assign a temporary project ID
-            project_temp_id = 1  # Since there's only one project, we use a static temp ID
-
-            # Format tasks correctly with temporary IDs
+            # Format tasks correctly
             tasks = [
                 {
                     "task_id": task.task_id,
                     "description": task.description,
-                    "employee_temp_id": task.employee_temp_id,
-                    "project_temp_id": project_temp_id,
+                    "employee_name": task.employee_name,
                 }
                 for task in project_plan_obj.tasks
             ]
 
-            # Format project details
-            project = {
-                "project_temp_id": project_temp_id,
-                "name": project_name,
-                "description": project_description,
-            }
-
             final_output_data = {
-                "project": project,
-                "employees": employees,
+                "project_name": project_name,
+                "description": project_description,
                 "tasks": tasks,
             }
 

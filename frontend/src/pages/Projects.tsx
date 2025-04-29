@@ -10,8 +10,6 @@ import { BACKEND_URL } from '@/data/Data';
 import { TaskBoard } from '@/components/project/TaskBoard';
 import { Task } from '@/data/Interfaces';
 
-
-
 interface Project {
   project_name: string;
   project_description: string;
@@ -20,12 +18,14 @@ interface Project {
 
 export default function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true); // Loading state
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const projectId = searchParams.get('project_id');
 
   useEffect(() => {
     const fetchProjects = async () => {
+      setLoading(true); // Start loading
       try {
         const response = await fetch(`${BACKEND_URL}/project`);
         if (!response.ok) throw new Error('Failed to fetch projects');
@@ -33,6 +33,8 @@ export default function Projects() {
         setProjects(data);
       } catch (error) {
         console.error('Error fetching projects:', error);
+      } finally {
+        setLoading(false); // Stop loading
       }
     };
 
@@ -50,7 +52,12 @@ export default function Projects() {
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-8">Projects</h1>
 
-        {!projectId ? (
+        {loading ? (
+          // Loading animation
+          <div className="flex justify-center items-center min-h-[200px]">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-kage-purple"></div>
+          </div>
+        ) : !projectId ? (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {projects.map((project, index) => (
               <motion.div
@@ -105,9 +112,7 @@ export default function Projects() {
 
               <div className="mb-8">
                 <h3 className="text-2xl font-semibold mb-4">Tasks</h3>
-                <TaskBoard
-                  tasks={selectedProject.tasks}
-                />
+                <TaskBoard tasks={selectedProject.tasks} />
               </div>
             </motion.div>
           )

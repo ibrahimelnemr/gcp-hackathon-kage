@@ -207,6 +207,7 @@ class Kage:
 
             response = model.generate_content(prompt, generation_config=generation_config)
             logger.info("Successfully received response from Vertex AI API.")
+            logger.info(response);
 
             if hasattr(response, 'text'):
                 return response.text

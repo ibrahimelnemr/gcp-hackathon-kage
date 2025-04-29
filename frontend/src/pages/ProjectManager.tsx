@@ -11,6 +11,7 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { format } from 'date-fns';
 import HttpHook from '@/hooks/HttpHook';
 import { TaskBoard } from '@/components/project/TaskBoard';
+import { BACKEND_URL, SAMPLE_PROJECT_NAME, SAMPLE_PROJECT_DESCRIPTION, SAMPLE_TEAM_MEMBERS } from '@/data/Data';
 
 // Define the team member department options
 const departmentOptions = [
@@ -20,12 +21,15 @@ const departmentOptions = [
 ];
 
 export default function ProjectManager() {
-  const [teamMembers, setTeamMembers] = useState<any[]>([]);
-  const [projectName, setProjectName] = useState('');
-  const [projectDescription, setProjectDescription] = useState('');
+  const [teamMembers, setTeamMembers] = useState<any[]>(SAMPLE_TEAM_MEMBERS);
+  const [projectName, setProjectName] = useState(SAMPLE_PROJECT_NAME);
+  const [projectDescription, setProjectDescription] = useState(SAMPLE_PROJECT_DESCRIPTION);
   const [formError, setFormError] = useState('');
   const [analysisResult, setAnalysisResult] = useState<any | null>(null);
   const { sendRequest, loading, httpError } = HttpHook();
+
+  
+  
   
   const addTeamMember = () => {
     const newMember: any = {
@@ -161,7 +165,7 @@ export default function ProjectManager() {
     try {
 
       // Send request using fetch
-      // const res = await fetch('https://gcp-hackathon-kage-backend-test1-895087232693.us-central1.run.app/', {
+      // const res = await fetch(BACKEND_URL, {
       //   method: 'POST',
       //   headers: {
       //     'Content-Type': 'application/json',
@@ -175,20 +179,24 @@ export default function ProjectManager() {
       // console.log('Success:', data);
 
       // Send request using httphook
-      // const response = await sendRequest<any>({
-      //   method: 'post', 
-      //   url: 'https://gcp-hackathon-kage-backend-test1-895087232693.us-central1.run.app/',
-      //   body: projectData
-      // });
-      // console.log("response from API called via HttpHook");
-      // console.log(response);
+      const response = await sendRequest<any>({
+        method: 'post', 
+        url: `${BACKEND_URL}/ai/generate`,
+        body: projectData
+      });
+      console.log("response from API called via HttpHook");
+      console.log(response);
       
       // with MOCK DATA
       
-      const result = await submitProjectMock(projectData);
+      // const result = await submitProjectMock(projectData);
+
+      const data = {
+        generated_plan: response
+      }
       
-      if (result) {
-        setAnalysisResult(result);
+      if (response) {
+        setAnalysisResult(data);
       }
     } catch (error) {
       console.error('Error submitting project:', error);

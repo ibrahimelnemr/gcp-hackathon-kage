@@ -148,3 +148,21 @@ gcloud services enable aiplatform.googleapis.com --project=centered-accord-44221
 gcloud projects add-iam-policy-binding centered-accord-442214-b9 \
   --member="serviceAccount:895087232693-compute@developer.gserviceaccount.com" \
   --role="roles/aiplatform.admin"
+
+  ## Sample Project
+
+  Description
+
+  Develop an AI agent that can extract text from a contract (word document) and compare it to a template. The AI agent must be able to compare the contract to the template and provide differences where the contract does not comply with the template and provide a proposal to the contract
+
+
+  Name
+
+  Company document comparison_V2
+
+
+Team members
+
+John Appleseed - Analyst - AI & Data
+
+Jane Doe - Consultant - Cloud

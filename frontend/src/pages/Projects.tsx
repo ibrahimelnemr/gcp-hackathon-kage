@@ -1,5 +1,5 @@
 import { Link, useSearchParams } from 'react-router-dom';
-import { ArrowRight, Terminal, Users, MessageSquare } from 'lucide-react';
+import { ArrowRight, Terminal, Users, MessageSquare, ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { AnimatedGradientBackground } from '@/components/ui/animated-gradient-background';
 import { motion } from 'framer-motion';
@@ -45,49 +45,8 @@ export default function Projects() {
 
   const selectedProject = projects.find((project) => project.project_name === projectId);
 
-  const fadeInUp = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.6 }
-  };
-  
-  const staggerContainer = {
-    animate: {
-      transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
-  
-  const features = [
-    {
-      icon: <Users className="h-6 w-6" />,
-      title: "Project Management",
-      description: "Build your dream team and get AI-powered task assignments.",
-      path: "/project-manager",
-      color: "bg-kage-purple"
-    },
-    {
-      icon: <Terminal className="h-6 w-6" />,
-      title: "Code Assistant",
-      description: "Analyze and optimize your code with advanced AI guidance.",
-      //path: "/code-assistant",
-      path: "https://console.cloud.google.com/vertex-ai/studio/multimodal?endpointId=7663865425947525120&region=us-central1&cloudshell=true&invt=AbuvLg&project=nse-gcp-ema-tt-ec0b4-sbx-1&pli=1",
-      color: "bg-kage-accent"
-    },
-    // {
-    //   icon: <MessageSquare className="h-6 w-6" />,
-    //   title: "AI Chat",
-    //   description: "Get real-time answers to technical questions from KAGE.",
-    //   path: "/ai-chat",
-    //   color: "bg-kage-purple-light"
-    // }
-  ];
-
   return (
     <div className="flex flex-col min-h-screen">
-
-      {/* Projects Section */}
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-8">Projects</h1>
 
@@ -123,14 +82,34 @@ export default function Projects() {
           </div>
         ) : (
           selectedProject && (
-            <div>
-              <h2 className="text-2xl font-bold mb-4">{selectedProject.project_name}</h2>
-              <p className="mb-4">{selectedProject.project_description}</p>
-              <TaskBoard tasks={selectedProject.tasks} />
-              <Button variant="secondary" onClick={() => navigate('/projects')}>
+            <motion.div
+              className="bg-kage-gray rounded-lg shadow-md p-8 border border-border"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <button
+                onClick={() => navigate('/projects')}
+                className="flex items-center text-muted-foreground mb-4 hover:text-kage-gray-900 transition-colors"
+              >
+                <ArrowLeft className="mr-2" /> {/* Back arrow icon */}
                 Back to Projects
-              </Button>
-            </div>
+              </button>
+
+              <h2 className="text-4xl font-bold text-kage-gray-900 mb-4">
+                {selectedProject.project_name}
+              </h2>
+              <p className="text-lg text-muted-foreground mb-6">
+                {selectedProject.project_description}
+              </p>
+
+              <div className="mb-8">
+                <h3 className="text-2xl font-semibold mb-4">Tasks</h3>
+                <TaskBoard
+                  tasks={selectedProject.tasks}
+                />
+              </div>
+            </motion.div>
           )
         )}
       </div>

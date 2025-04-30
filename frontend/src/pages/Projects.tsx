@@ -62,7 +62,7 @@ export default function Projects() {
             {projects.map((project, index) => (
               <motion.div
                 key={index}
-                className="bg-kage-gray rounded-lg p-6 shadow-md hover:shadow-lg transition-all duration-300 border border-border"
+                className="rounded-lg shadow-md hover:shadow-lg transition-all duration-300 "
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}

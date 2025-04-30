@@ -135,7 +135,7 @@ export default function ProjectManager() {
     try {
       const response = await sendRequest<any>({
         method: 'post',
-        url: `${BACKEND_URL}/projects`,
+        url: `${BACKEND_URL}/ai/generate`,
         body: projectData,
       });
   

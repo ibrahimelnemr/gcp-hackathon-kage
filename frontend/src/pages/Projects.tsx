@@ -30,6 +30,8 @@ export default function Projects() {
         const response = await fetch(`${BACKEND_URL}/project`);
         if (!response.ok) throw new Error('Failed to fetch projects');
         const data = await response.json();
+        console.log('Fetched projects:');
+        console.log(data);
         setProjects(data);
       } catch (error) {
         console.error('Error fetching projects:', error);

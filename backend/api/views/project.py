@@ -53,6 +53,7 @@ def get_projects(request):
             task_list = []
             for task in tasks:
                 task_list.append({
+                    "task_id": task.id,
                     "status": task.status,
                     "description": task.description,
                     "employee_name": task.employee.name if task.employee else None,

@@ -62,22 +62,25 @@ export default function Projects() {
             {projects.map((project, index) => (
               <motion.div
                 key={index}
-                className="bg-kage-gray rounded-lg p-6 shadow-md hover:shadow-lg transition-all duration-300 border border-border"
+                className="bg-kage-gray rounded-lg p-6 shadow-md hover:shadow-xl transition-all duration-300 border border-border hover:border-kage-purple"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
               >
-                <Card>
+                <Card className="h-full flex flex-col justify-between">
                   <CardHeader>
-                    <CardTitle>{project.project_name}</CardTitle>
+                    <CardTitle className="text-xl font-semibold text-kage-gray-900 mb-2">
+                      {project.project_name}
+                    </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      {project.project_description.split("\n")[0]} {/* Display first line */}
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
+                      {project.project_description} {/* Display up to 3 lines */}
                     </p>
                     <Button
                       variant="default"
+                      className="w-full bg-kage-purple text-white hover:bg-kage-purple-dark transition-colors"
                       onClick={() => handleProjectClick(project)}
                     >
                       View Details

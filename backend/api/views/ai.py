@@ -40,14 +40,14 @@ def generate_project_plan(request):
             "Goal: Demonstrable proof-of-concept for company to test.\n"
             "End Date: June 2025"
         )
-        default_team_roles = {
-            "Analyst 1": "AI and Data",
-            "Senior Consultant 1": "AI and Data",
-            "Consultant 1": "Cloud",
-            "Senior Consultant 2": "Cloud",
-            "Analyst 2": "Fullstack",
-            "Senior Consultant 3": "Fullstack",
-        }
+        default_team_roles = [
+            {"name": "John", "level": "Analyst", "department": "AI and Data"},
+            {"name": "Jane", "level": "Senior Consultant", "department": "AI and Data"},
+            {"name": "Appleseed", "level": "Consultant", "department": "Cloud"},
+            {"name": "Bartholomew", "level": "Senior Consultant", "department": "Cloud"},
+            {"name": "Alice", "level": "Analyst", "department": "Fullstack"},
+            {"name": "Frank", "level": "Senior Consultant", "department": "Fullstack"},
+        ]
 
         # Use provided data or fallback to defaults
         project_name = data.get("project_name", default_project_name)
@@ -55,12 +55,14 @@ def generate_project_plan(request):
         team_roles = data.get("team_roles", default_team_roles)
 
         # Validate team_roles format
-        if not isinstance(team_roles, dict):
-            return JsonResponse({"error": "'team_roles' must be a dictionary."}, status=400)
+        if not isinstance(team_roles, list) or not all(
+            isinstance(role, dict) and {"name", "level", "department"}.issubset(role) for role in team_roles
+        ):
+            return JsonResponse({"error": "'team_roles' must be a list of objects with 'name', 'level', and 'department'."}, status=400)
 
         # Initialize the Kage class and generate the project plan
         kage = Kage()
-        project_plan = kage.generate_project_plan(
+        kage_project_plan = kage.generate_project_plan(
             project_name=project_name,
             project_description=project_description,
             team_roles=team_roles
@@ -70,26 +72,30 @@ def generate_project_plan(request):
         project = Project.objects.create(name=project_name, description=project_description)
 
         # Create employees based on team_roles
-        employees = {}
-        for role, department in team_roles.items():
-            employee = Employee.objects.create(name=role, level=role, department=department)
-            employees[role] = employee
+        for role in team_roles:
+            Employee.objects.create(
+                name=role["name"],
+                level=role["level"],
+                department=role["department"]
+            )
 
         # Create tasks based on the project plan
-        for task in project_plan.get("tasks", []):
-            assigned_role = task.get("assigned_role_experience")  # Get the role assigned to the task
-            assigned_employee = employees.get(assigned_role)  # Find the employee for the role
+        for task in kage_project_plan.get("tasks", []):
+            employee_name = task.get("employee_name")  # Get the employee name from the task
+            assigned_employee = Employee.objects.filter(name=employee_name).first()  # Fetch the employee by name
+
             if not assigned_employee:
-                print(f"Warning: No employee found for role {assigned_role}")  # Debugging log
+                print(f"Warning: No employee found with name {employee_name}")  # Debugging log
+
             Task.objects.create(
                 project=project,
-                employee=assigned_employee,  # Assign the correct employee
+                employee=assigned_employee,  # Associate the employee with the task
                 description=task.get("description", ""),
-                status="pending"  # Default status
+                status="to-do"
             )
 
         # Return the generated project plan as a JSON response
-        return JsonResponse(project_plan, safe=False, status=200)
+        return JsonResponse({"generated_plan": kage_project_plan}, safe=False, status=200)
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
@@ -121,38 +127,3 @@ def ai_chat(request):
         # return Response({"error": str(e)}, status=500)
         return JsonResponse({"error": str(e)}, status=500)
 
-@api_view(['GET'])
-def get_projects(request):
-    try:
-        # Fetch all projects
-        projects = Project.objects.all()
-
-        # Prepare the response data
-        response_data = []
-        for project in projects:
-            # Fetch tasks related to the project
-            tasks = Task.objects.filter(project=project).select_related('employee')
-
-            # Prepare task details
-            task_list = []
-            for task in tasks:
-                task_list.append({
-                    "status": task.status,
-                    "description": task.description,
-                    "employee_name": task.employee.name if task.employee else None,
-                    "employee_level": task.employee.level if task.employee else None,
-                    "employee_department": task.employee.department if task.employee else None,
-                })
-
-            # Add project details to the response
-            response_data.append({
-                "project_name": project.name,
-                "project_description": project.description,
-                "tasks": task_list
-            })
-
-        # Return the response as JSON
-        return JsonResponse(response_data, safe=False, status=200)
-
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=500)

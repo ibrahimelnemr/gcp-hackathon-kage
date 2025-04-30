@@ -1,39 +1,21 @@
-
 import { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, ChevronLeft, Clock, CheckCircle, Circle } from 'lucide-react';
+import { Task } from '@/data/Interfaces';
 
-interface Task {
-  task_id: number;
-  description: string;
-  assigned_role_experience: string;
-  assigned_role_department: string;
-  rationale: string;
-  status?: "to-do" | "in-progress" | "done";
-}
-
-interface MissingRole {
-  experience: string;
-  department: string;
-  reasoning: string;
-}
 
 interface TaskBoardProps {
   tasks: Task[];
-  missingRoles: MissingRole[];
 }
 
-export function TaskBoard({ tasks: initialTasks, missingRoles }: TaskBoardProps) {
-  const [tasks, setTasks] = useState<Task[]>(
-    initialTasks.map(task => ({ ...task, status: "to-do" }))
-  );
+export function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
+  const [tasks, setTasks] = useState<Task[]>(initialTasks);
 
   // Move task to next status
   const moveTaskForward = (taskId: number) => {
-    setTasks(currentTasks => 
+    setTasks(currentTasks =>
       currentTasks.map(task => {
         if (task.task_id === taskId) {
           if (task.status === "to-do") return { ...task, status: "in-progress" };
@@ -46,7 +28,7 @@ export function TaskBoard({ tasks: initialTasks, missingRoles }: TaskBoardProps)
 
   // Move task to previous status
   const moveTaskBackward = (taskId: number) => {
-    setTasks(currentTasks => 
+    setTasks(currentTasks =>
       currentTasks.map(task => {
         if (task.task_id === taskId) {
           if (task.status === "done") return { ...task, status: "in-progress" };
@@ -78,9 +60,9 @@ export function TaskBoard({ tasks: initialTasks, missingRoles }: TaskBoardProps)
                   <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500">
                     Task #{task.task_id}
                   </Badge>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => moveTaskForward(task.task_id)}
                     className="h-8 w-8"
                   >
@@ -90,10 +72,7 @@ export function TaskBoard({ tasks: initialTasks, missingRoles }: TaskBoardProps)
               </CardHeader>
               <CardContent>
                 <p className="text-sm mb-3">{task.description}</p>
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{task.assigned_role_experience}</span>
-                  <span>{task.assigned_role_department}</span>
-                </div>
+                <div className="text-xs text-muted-foreground">{task.employee_name}</div>
               </CardContent>
             </Card>
           ))}
@@ -113,17 +92,17 @@ export function TaskBoard({ tasks: initialTasks, missingRoles }: TaskBoardProps)
                     Task #{task.task_id}
                   </Badge>
                   <div className="flex space-x-1">
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => moveTaskBackward(task.task_id)}
                       className="h-8 w-8"
                     >
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
+                    <Button
+                      variant="ghost"
+                      size="icon"
                       onClick={() => moveTaskForward(task.task_id)}
                       className="h-8 w-8"
                     >
@@ -134,10 +113,7 @@ export function TaskBoard({ tasks: initialTasks, missingRoles }: TaskBoardProps)
               </CardHeader>
               <CardContent>
                 <p className="text-sm mb-3">{task.description}</p>
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{task.assigned_role_experience}</span>
-                  <span>{task.assigned_role_department}</span>
-                </div>
+                <div className="text-xs text-muted-foreground">{task.employee_name}</div>
               </CardContent>
             </Card>
           ))}
@@ -156,9 +132,9 @@ export function TaskBoard({ tasks: initialTasks, missingRoles }: TaskBoardProps)
                   <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500">
                     Task #{task.task_id}
                   </Badge>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     onClick={() => moveTaskBackward(task.task_id)}
                     className="h-8 w-8"
                   >
@@ -168,44 +144,12 @@ export function TaskBoard({ tasks: initialTasks, missingRoles }: TaskBoardProps)
               </CardHeader>
               <CardContent>
                 <p className="text-sm mb-3">{task.description}</p>
-                <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>{task.assigned_role_experience}</span>
-                  <span>{task.assigned_role_department}</span>
-                </div>
+                <div className="text-xs text-muted-foreground">{task.employee_name}</div>
               </CardContent>
             </Card>
           ))}
         </div>
       </div>
-
-      {/* Missing Roles Section */}
-      {missingRoles.length > 0 && (
-        <Card className="mt-8">
-          <CardHeader>
-            <CardTitle className="text-xl">Recommended Additional Team Members</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Experience Level</TableHead>
-                  <TableHead>Department</TableHead>
-                  <TableHead>Justification</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {missingRoles.map((role, index) => (
-                  <TableRow key={index}>
-                    <TableCell className="font-medium">{role.experience}</TableCell>
-                    <TableCell>{role.department}</TableCell>
-                    <TableCell className="text-sm">{role.reasoning}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }

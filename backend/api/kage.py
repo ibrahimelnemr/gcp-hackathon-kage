@@ -23,20 +23,11 @@ class Task(BaseModel):
     """Represents a single, concise task derived from the project description."""
     task_id: int = Field(description="A unique sequential identifier for the task.")
     description: str = Field(description="A clear and concise description of the task, suitable for one person to work on.")
-    assigned_role_experience: str = Field(description="The experience level of the team member best suited for this task (e.g., Analyst, Consultant, Senior Consultant). Must match one of the keys in the input roles dictionary.")
-    assigned_role_department: str = Field(description="The department of the team member best suited for this task (e.g., AI and Data, Cloud, Fullstack). Must match the department associated with the assigned experience level in the input roles dictionary.")
-    rationale: str = Field(description="Brief justification for assigning this task to the specified role experience and department and why this specified role experience **and** department is best suited for")
-
-class MissingRole(BaseModel):
-    """Represents a role deemed missing for optimal project execution."""
-    experience: str = Field(description="The suggested experience level for the missing role (e.g., Senior Consultant, Manager).")
-    department: str = Field(description="The suggested department specialization for the missing role (e.g., Cybersecurity, UX/UI Design, DevOps).")
-    reasoning: str = Field(description="Explanation why this role is needed for the project.")
+    employee_name: str = Field(description="The name of the employee assigned to this task.")
 
 class ProjectPlan(BaseModel):
-    """The overall project plan containing tasks and identified missing roles."""
+    """The overall project plan containing tasks."""
     tasks: List[Task] = Field(description="A list of all the broken-down project tasks.")
-    missing_roles: List[MissingRole] = Field(description="A list of roles identified as potentially missing from the team for this project.", default=[])
 
     @field_validator('tasks')
     @classmethod
@@ -44,8 +35,6 @@ class ProjectPlan(BaseModel):
         if not tasks_value:
             raise ValueError("The list of tasks cannot be empty.")
         return tasks_value
-
-
 
 class Kage:
     def __init__(self):
@@ -101,13 +90,16 @@ class Kage:
             logger.error(f"Failed to initialize Vertex AI client: {e}")
             raise
 
-    def create_kage_prompt(self, project_description: str, team_roles: Dict[str, str], logger: logging.Logger) -> str:
+    def create_kage_prompt(self, project_description: str, team_roles: List[Dict[str, str]], logger: logging.Logger) -> str:
         logger.info("Creating KAGE project plan prompt")
         logger.info(team_roles)
 
         parser = PydanticOutputParser(pydantic_object=ProjectPlan)
 
-        formatted_roles = "\n".join([f"- {exp}: {dep}" for exp, dep in team_roles.items()])
+        # Format team_roles as a list of strings
+        formatted_roles = "\n".join(
+            [f"- {role['name']} (Level: {role['level']}, Department: {role['department']})" for role in team_roles]
+        )
         if not formatted_roles:
             formatted_roles = "No team roles provided."
 
@@ -136,15 +128,14 @@ class Kage:
 
         prompt_template = PromptTemplate(
             template="""
-            You are KAGE, an expert project management assistant. Your goal is to create a structured project plan by first decomposing the work, then assigning it to the available team, and finally identifying any gaps including workload imbalances.
+            You are KAGE, an expert project management assistant. Your goal is to create a structured project plan.
 
             **Project Description:**
             {project_description}
 
             {experience_definitions}
 
-            **Available Team Roles (Experience: Department):**
-            (**IMPORTANT:** Team roles may include a number at the end (such as Analyst 1 or Consultant 2) in order for the dictionary to distinguish between the titles. Treat the roles as if they do not have a number at the end.)
+            **Available Team Roles (Name, Level, Department):**
             {team_roles}
 
             **Instructions - Follow these steps SEQUENTIALLY:**
@@ -157,29 +148,15 @@ class Kage:
 
             2.  **Assign Decomposed Tasks to Available Roles:**
                 *   Now, take the list of tasks created in Step 1.
-                *   For *each* task, attempt to assign it to the *most suitable* team member profile from the 'Available Team Roles' list (anything to do with data extraction or AI should be assigned to AI and Data for example).
-                *   Base the assignment on the task's nature, its inferred skill requirements, and the 'Experience Level Guidelines' provided above.
-                *   Use the exact Experience and Department strings from the 'Available Team Roles' when assigning.
-                *   Provide a 'rationale' for each task assignment, explaining *why* that specific role profile is the best fit from the available options, or noting if the fit isn't perfect but is the closest available.
+                *   For *each* task, attempt to assign it to the *most suitable* team member profile from the 'Available Team Roles' list.
+                *   Use the exact Name, Level, and Department strings from the 'Available Team Roles' when assigning.
+                *   Assign a temporary employee ID (`employee_temp_id`) to each team member and include it in the task assignment.
+                *   Assign a temporary project ID (`project_temp_id`) to all tasks.
 
-            3.  **Identify Missing Roles, Skills, Oversight, and Workload Gaps:**
-                *   Analyze the task list (Step 1) and assignments (Step 2) against 'Available Team Roles'.
-                *   **(a) Skill/Department Gaps:** Identify critical skills/departments needed for tasks but completely absent in the team. Recommend adding appropriate roles (Experience Level + Department).
-                *   **(b) Oversight Gaps:** Verify required Senior Consultant (or higher) oversight for departments with assigned Analysts/Consultants. If missing, recommend adding a 'Senior Consultant' for that department, noting the Consultant alternative if applicable (needs confirmation).
-                *   **(c) Workload Imbalance Analysis:**
-                    i.  **Count Tasks per Unique Role:** For each unique role key in 'Available Team Roles', count how many tasks were assigned to it in Step 2.
-                    ii. **Identify Potential Overload:** Pay close attention to any unique role key assigned a high number of tasks - **consider 2 or more tasks as potentially high load**, adjust based on task nature. Also consider if a junior role (Analyst) is assigned many complex tasks. **No analyst should have more than 2 tasks** so suggest more analysts if need be.
-                    iii.**Check for Reassignment:** Before recommending new hires *purely* for workload, check: Could any tasks assigned to an identified overloaded role be *reasonably* reassigned to another *existing* unique role key that has significantly fewer tasks assigned, even if the skill fit is slightly less perfect? Note this possibility if applicable.
-                    iv. **Recommend Additions for Workload:** If reassignment is not feasible or insufficient, and a role/department remains overloaded (based on task count or complexity for role level), **recommend adding another specific role** (typically 'Analyst' or 'Consultant') to that department.
-                    v.  **Mandatory Reasoning:** The 'reasoning' for any role recommended *due to workload* **must explicitly state** "Workload balancing for [Department Name]", mention the overloaded role(s) (e.g., "to support [Unique Role Key]"), and ideally reference the high task count (e.g., "due to high task count assigned"). If suggesting reassignment was considered, mention that briefly in the reasoning for adding the new role (e.g., "...reassignment insufficient").
-                *   Combine all findings (a, b, c) into the `missing_roles` list. Provide clear 'reasoning' for each suggestion per the instructions.
-                *   If no gaps found, provide an empty list for `missing_roles`.
-
-            4.  **Output Format:** Structure your entire response strictly as a JSON object conforming to the following schema. Do **not** include any text outside the JSON structure.
+            3.  **Output Format:** Structure your entire response strictly as a JSON object conforming to the following schema. Do **not** include any text outside the JSON structure.
 
             **Output JSON Schema:**
             {format_instructions}
-
             Generate the project plan now.
             """,
             input_variables=["project_description", "team_roles"],
@@ -207,6 +184,7 @@ class Kage:
 
             response = model.generate_content(prompt, generation_config=generation_config)
             logger.info("Successfully received response from Vertex AI API.")
+            logger.info(response);
 
             if hasattr(response, 'text'):
                 return response.text
@@ -231,13 +209,13 @@ class Kage:
             json_str = match.group(0) if match else cleaned_response
 
             parsed_plan = parser.parse(json_str)
-            logger.info(f"Successfully parsed KAGE plan with {len(parsed_plan.tasks)} tasks and {len(parsed_plan.missing_roles)} missing roles identified.")
+            logger.info(f"Successfully parsed KAGE plan with {len(parsed_plan.tasks)} tasks.")
             return parsed_plan
         except Exception as e:
             logger.error(f"Failed to parse the model response: {e}")
             raise ValueError(f"Failed to parse the model response into ProjectPlan structure. Error: {e}")
 
-    def generate_project_plan(self, project_name: str, project_description: str, team_roles: Dict[str, str]) -> Dict:
+    def generate_project_plan(self, project_name: str, project_description: str, team_roles: List[Dict[str, str]]) -> Dict:
         logger, log_file = self.setup_logging(project_name)
         logger.info(f"Starting KAGE project plan generation for: {project_name}")
         start_time = time.time()
@@ -245,9 +223,15 @@ class Kage:
         if not project_description:
             logger.error("Project description cannot be empty.")
             raise ValueError("Project description cannot be empty.")
-        if not isinstance(team_roles, dict):
-            logger.error("Team roles must be a dictionary.")
-            raise ValueError("Team roles must be a dictionary.")
+        if not isinstance(team_roles, list):
+            logger.error("Team roles must be a list of objects.")
+            raise ValueError("Team roles must be a list of objects.")
+
+        # Validate team_roles format
+        for role in team_roles:
+            if not all(key in role for key in ["name", "level", "department"]):
+                logger.error("Each team role must have 'name', 'level', and 'department' fields.")
+                raise ValueError("Each team role must have 'name', 'level', and 'department' fields.")
 
         output_dir = "output_plans"
         os.makedirs(output_dir, exist_ok=True)
@@ -258,20 +242,27 @@ class Kage:
             response_content = self.generate_kage_response(model, prompt, logger)
             project_plan_obj = self.parse_kage_response(response_content, logger)
 
-            result_dict = project_plan_obj.model_dump()
+            # Format tasks correctly
+            tasks = [
+                {
+                    "task_id": task.task_id,
+                    "description": task.description,
+                    "employee_name": task.employee_name,
+                    "status": "to-do",
+                }
+                for task in project_plan_obj.tasks
+            ]
 
+            final_output_data = {
+                "project_name": project_name,
+                "description": project_description,
+                "tasks": tasks,
+            }
+
+            # Save the output to a file
             timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
             output_filename = f"plan_{project_name.replace(' ', '_')}_{timestamp}.json"
             output_filepath = os.path.join(output_dir, output_filename)
-
-            final_output_data = {
-                "input_parameters": {
-                    "project_name": project_name,
-                    "project_description": project_description,
-                    "team_roles": team_roles
-                },
-                "generated_plan": result_dict
-            }
 
             with open(output_filepath, 'w', encoding='utf-8') as f:
                 json.dump(final_output_data, f, indent=4, ensure_ascii=False)
@@ -281,7 +272,7 @@ class Kage:
             logger.info(f"KAGE project plan generation completed in {end_time - start_time:.2f} seconds.")
             logger.info(f"Log file saved to: {log_file}")
 
-            return result_dict
+            return final_output_data
         except Exception as e:
             logger.error(f"KAGE project plan generation failed: {str(e)}")
             raise ValueError(f"KAGE project plan generation failed: {str(e)}")

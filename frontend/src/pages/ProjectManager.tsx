@@ -11,8 +11,9 @@ import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { format } from 'date-fns';
 import HttpHook from '@/hooks/HttpHook';
 import { TaskBoard } from '@/components/project/TaskBoard';
+import { BACKEND_URL, SAMPLE_PROJECT_NAME, SAMPLE_PROJECT_DESCRIPTION, SAMPLE_TEAM_MEMBERS } from '@/data/Data';
+import { useNavigate } from 'react-router-dom';
 
-// Define the team member department options
 const departmentOptions = [
   { value: 'Full Stack', label: 'Full Stack' },
   { value: 'AI and Data', label: 'AI and Data' },
@@ -20,12 +21,15 @@ const departmentOptions = [
 ];
 
 export default function ProjectManager() {
-  const [teamMembers, setTeamMembers] = useState<any[]>([]);
-  const [projectName, setProjectName] = useState('');
-  const [projectDescription, setProjectDescription] = useState('');
+  const [teamMembers, setTeamMembers] = useState<any[]>(SAMPLE_TEAM_MEMBERS);
+  const [projectName, setProjectName] = useState(SAMPLE_PROJECT_NAME);
+  const [projectDescription, setProjectDescription] = useState(SAMPLE_PROJECT_DESCRIPTION);
   const [formError, setFormError] = useState('');
   const [analysisResult, setAnalysisResult] = useState<any | null>(null);
   const { sendRequest, loading, httpError } = HttpHook();
+  const navigate = useNavigate();
+  
+  
   
   const addTeamMember = () => {
     const newMember: any = {
@@ -79,10 +83,9 @@ export default function ProjectManager() {
   };
 
   async function submitProjectMock(projectData: any): Promise<any> {
-
     // Simulate API call delay
     await new Promise(resolve => setTimeout(resolve, 1000));
-    
+
     // Mock response data
     return {
       generated_plan: {
@@ -90,48 +93,29 @@ export default function ProjectManager() {
           {
             task_id: 1,
             description: "Run Axe accessibility scan on the portal.",
-            assigned_role_experience: "Senior Consultant",
-            assigned_role_department: "Accessibility",
-            rationale: "Needs accessibility expertise to configure tool and interpret results."
+            status: "to-do",
+            employee_name: "John Doe"
           },
           {
             task_id: 2,
             description: "Review login flow for keyboard navigation issues.",
-            assigned_role_experience: "Senior Consultant",
-            assigned_role_department: "Accessibility",
-            rationale: "Requires manual accessibility testing experience."
+            status: "in-progress",
+            employee_name: "Jane Smith"
           },
           {
             task_id: 3,
             description: "Review dashboard for screen reader compatibility.",
-            assigned_role_experience: "Senior Consultant",
-            assigned_role_department: "Accessibility",
-            rationale: "Expertise with screen readers is essential."
+            status: "done",
+            employee_name: "Alice Johnson"
           },
           {
             task_id: 4,
             description: "Identify color contrast issues across the portal.",
-            assigned_role_experience: "Senior Consultant",
-            assigned_role_department: "Accessibility",
-            rationale: "Visual accessibility expertise required."
-          }
-        ],
-        missing_roles: [
-          {
-            experience: "Consultant",
-            department: "Fullstack",
-            reasoning: "Helps with workload and React-specific tasks."
+            status: "to-do",
+            employee_name: "Frank Brown"
           }
         ]
-      },
-      // Legacy format support
-      memberTasks: [],
-      timeline: {
-        startDate: new Date().toISOString(),
-        endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString(),
-        milestones: []
-      },
-      recommendations: []
+      }
     };
   }
   
@@ -142,57 +126,26 @@ export default function ProjectManager() {
       return;
     }
   
-    // Create team roles object (level: department)
-    const team_roles: Record<string, string> = {};
-    teamMembers.forEach(member => {
-      team_roles[member.level] = member.department;
-    });
-  
-    // Prepare project data
     const projectData: any = {
       project_name: projectName,
       project_description: projectDescription,
-      team_members: teamMembers // Include the array of team members
+      team_roles: teamMembers,
     };
   
-    // Log the form data to the console
-    console.log('Form Data:', projectData);
-  
     try {
-
-      // Send request using fetch
-      // const res = await fetch('https://gcp-hackathon-kage-backend-test1-895087232693.us-central1.run.app/', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      //   body: projectData
-      // });
-      
-      // if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
-
-      // const data = await res.json(); 
-      // console.log('Success:', data);
-
-      // Send request using httphook
-      // const response = await sendRequest<any>({
-      //   method: 'post', 
-      //   url: 'https://gcp-hackathon-kage-backend-test1-895087232693.us-central1.run.app/',
-      //   body: projectData
-      // });
-      // console.log("response from API called via HttpHook");
-      // console.log(response);
-      
-      // with MOCK DATA
-      
-      const result = await submitProjectMock(projectData);
-      
-      if (result) {
-        setAnalysisResult(result);
+      const response = await sendRequest<any>({
+        method: 'post',
+        url: `${BACKEND_URL}/ai/generate`,
+        body: projectData,
+      });
+  
+      if (response) {
+        console.log('Project created successfully:', response);
+        navigate('/projects'); // Navigate to the Projects page after successful submission
       }
     } catch (error) {
       console.error('Error submitting project:', error);
-      setFormError('Failed to analyze project. Please try again later.');
+      setFormError('Failed to create project. Please try again later.');
     }
   };
   
@@ -365,12 +318,13 @@ export default function ProjectManager() {
             </CardHeader>
             <CardContent className="space-y-8">
               {/* Task Board */}
+              
               {analysisResult.generated_plan && (
                 <TaskBoard 
                   tasks={analysisResult.generated_plan.tasks} 
-                  missingRoles={analysisResult.generated_plan.missing_roles} 
                 />
               )}
+            
               
               {/* Display legacy format if new format is not available */}
               {!analysisResult.generated_plan && analysisResult.memberTasks && (

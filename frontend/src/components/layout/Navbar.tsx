@@ -46,6 +46,7 @@ export function Navbar() {
               <Link
                   key={link.path}
                   to={link.path}
+                  target={link.path.startsWith('http') ? '_blank' : undefined}
                   className={`flex items-center px-3 py-2 text-sm font-medium rounded-md transition-colors 
                 ${location.pathname === link.path
                       ? 'bg-kage-purple/20 text-kage-purple-light'

@@ -12,44 +12,6 @@ def get_tasks(request, project_id):
     serializer = TaskSerializer(tasks, many=True)
     return Response(serializer.data)
 
-@api_view(['GET'])
-def generate_plan(request):
-    try:
-        # data = json.loads(request.body)
-        # print("Received input:", data)  
-        
-        mock_response = {
-            "generated_plan": {
-                "tasks": [
-                    {
-                        "task_id": 1,
-                        "description": "Run Axe accessibility scan on the portal.",
-                        "assigned_role_experience": "Senior Consultant",
-                        "assigned_role_department": "Accessibility",
-                        "rationale": "Needs accessibility expertise to configure tool and interpret results."
-                    },
-                    {
-                        "task_id": 2,
-                        "description": "Review login flow for keyboard navigation issues.",
-                        "assigned_role_experience": "Senior Consultant",
-                        "assigned_role_department": "Accessibility",
-                        "rationale": "Requires manual accessibility testing experience."
-                    }
-                ],
-                "missing_roles": [
-                    {
-                        "experience": "Consultant",
-                        "department": "Fullstack",
-                        "reasoning": "Helps with workload and React-specific tasks."
-                    }
-                ]
-            }
-        }
-        return JsonResponse(mock_response)
-
-    except Exception as e:
-        return JsonResponse({"error": str(e)}, status=400)
-
 @api_view(['POST'])
 def create_project(request):
     """
@@ -77,18 +39,56 @@ def create_project(request):
     
 @api_view(['GET'])
 def get_projects(request):
-    """
-    Handles a GET request to retrieve all projects from the database.
-    """
     try:
-        # Retrieve all projects from the database
+        # Fetch all projects
         projects = Project.objects.all()
 
-        # Serialize the projects
-        serializer = ProjectSerializer(projects, many=True)
+        # Prepare the response data
+        response_data = []
+        for project in projects:
+            # Fetch tasks related to the project
+            tasks = Task.objects.filter(project=project).select_related('employee')
 
-        # Return the serialized projects as a JSON response
-        return Response(serializer.data, status=200)
+            # Prepare task details
+            task_list = []
+            for task in tasks:
+                task_list.append({
+                    "task_id": task.id,
+                    "status": task.status,
+                    "description": task.description,
+                    "employee_name": task.employee.name if task.employee else None,
+                    "employee_level": task.employee.level if task.employee else None,
+                    "employee_department": task.employee.department if task.employee else None,
+                })
+
+            # Add project details to the response
+            response_data.append({
+                "project_name": project.name,
+                "project_description": project.description,
+                "tasks": task_list
+            })
+
+        # Return the response as JSON
+        return JsonResponse(response_data, safe=False, status=200)
 
     except Exception as e:
-        return JsonResponse({"error": str(e)}, status=400)
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+@api_view(['GET'])
+def delete_projects(request):
+    """
+    Deletes all projects along with their associated tasks and employees.
+    """
+    try:
+        # Delete all tasks associated with projects
+        Task.objects.all().delete()
+
+        # Delete all projects
+        Project.objects.all().delete()
+
+        # Return a success response
+        return JsonResponse({"message": "All projects, tasks, and associated data have been deleted successfully."}, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)

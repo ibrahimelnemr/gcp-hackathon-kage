@@ -50,7 +50,7 @@ Run the app itself (terminal), remove container when finished to view/test app
 `docker run --rm -it -p 5173:5173 -e BACKEND_URL=http://enter-backend-url-here kage-frontend`
 
 Run the app itself in terminal, remove container when finished, allow for local development, include container node modules not local
-`docker run --rm -it -p 5173:5173 -e BACKEND_URL=http://enter-backend-url-here -v "$(pwd)":/app -v kage-frontend_node_modules:/app/node_modules -w /app kage-frontend bash`
+`docker run --rm -it -p 5173:5173 -e BACKEND_URL=http://enter-backend-url-here -v "$(pwd)":/app -v kage-frontend_node_modules:/app/node_modules -w /app --user root kage-frontend bash`
 
 or to use default backend url
 `docker run --rm -it -p 5173:5173 -v "$(pwd)":/app -v kage-frontend_node_modules:/app/node_modules -w /app kage-frontend --user root bash`
@@ -90,7 +90,7 @@ however, for running in production with a different backend ensure to pass an en
 
 this will generate a .env file in the frontend folder with the correct backend url
 
-`docker run -p 5173:5173 --rm -e BACKEND_URL=http://localhost:5050 ibrahimelnemr/kage-frontend:latest`
+`docker run -p 5173:5173 --rm -e BACKEND_URL=http://localhost:5050 --user root ibrahimelnemr/kage-frontend:latest`
 
 ## Database schema
 

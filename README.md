@@ -53,7 +53,7 @@ Run the app itself in terminal, remove container when finished, allow for local 
 `docker run --rm -it -p 5173:5173 -e BACKEND_URL=http://enter-backend-url-here -v "$(pwd)":/app -v kage-frontend_node_modules:/app/node_modules -w /app kage-frontend bash`
 
 or to use default backend url
-`docker run --rm -it -p 5173:5173 -v "$(pwd)":/app -v kage-frontend_node_modules:/app/node_modules -w /app kage-frontend bash`
+`docker run --rm -it -p 5173:5173 -v "$(pwd)":/app -v kage-frontend_node_modules:/app/node_modules -w /app kage-frontend --user root bash`
 
 then within the terminal, run `npm run dev`
 

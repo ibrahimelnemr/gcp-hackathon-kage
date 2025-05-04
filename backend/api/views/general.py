@@ -77,3 +77,4 @@ def refresh_sample_data():
         """
         delete_sample_data()
         create_sample_data()
+

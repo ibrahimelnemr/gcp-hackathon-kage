@@ -9,7 +9,7 @@ from google.genai import types
 from ..kage import Kage
 import json
 from dotenv import load_dotenv
-from ..models import Project, Task, Employee  # Import the models
+from ..models import Project, Task, Employee
 
 load_dotenv() 
 

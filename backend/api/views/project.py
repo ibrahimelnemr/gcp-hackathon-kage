@@ -2,9 +2,13 @@ import json
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
 from ..models import Project, Task
 from ..serializers import ProjectSerializer, TaskSerializer
 
+class ProjectViewSet(ModelViewSet):
+    queryset = Project.objects.all()
+    serializer_class = ProjectSerializer
 
 @api_view(['GET'])
 def get_tasks(request, project_id):
@@ -35,8 +39,7 @@ def create_project(request):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
-    
-    
+
 @api_view(['GET'])
 def get_projects(request):
     try:
@@ -77,17 +80,11 @@ def get_projects(request):
 
 @api_view(['GET'])
 def delete_projects(request):
-    """
-    Deletes all projects along with their associated tasks and employees.
-    """
     try:
-        # Delete all tasks associated with projects
         Task.objects.all().delete()
 
-        # Delete all projects
         Project.objects.all().delete()
 
-        # Return a success response
         return JsonResponse({"message": "All projects, tasks, and associated data have been deleted successfully."}, status=200)
 
     except Exception as e:

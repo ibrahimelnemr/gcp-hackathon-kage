@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from ..models import Project, Task
+from ..models import Project, Task, Employee
 from ..serializers import ProjectSerializer, TaskSerializer
 from django.shortcuts import get_object_or_404
 
@@ -127,3 +127,26 @@ def get_project_details(request, project_id):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+@api_view(['POST'])
+def manage_project_employees(request, project_id):
+    """
+    Add or remove employees from a project.
+    """
+    try:
+        project = get_object_or_404(Project, id=project_id)
+        employee_ids = request.data.get('employee_ids', [])
+
+        # Validate employee IDs
+        employees = Employee.objects.filter(id__in=employee_ids)
+        if not employees.exists():
+            return Response({"error": "No valid employees found."}, status=400)
+
+        # Update the project's employees
+        project.employees.set(employees)  # Replace existing employees with the new list
+        project.save()
+
+        return Response({"message": "Employees updated successfully."}, status=200)
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)

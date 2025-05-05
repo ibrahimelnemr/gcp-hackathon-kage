@@ -13,6 +13,7 @@ class Employee(models.Model):
 class Project(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
+    employees = models.ManyToManyField(Employee, related_name='projects', blank=True)
 
     def __str__(self):
         return self.name

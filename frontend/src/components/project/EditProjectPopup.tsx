@@ -56,10 +56,10 @@ export function EditProjectPopup({ isOpen, onClose, project, onProjectUpdated }:
         </div>
       </div>
       <div className="mt-6 flex justify-end space-x-4">
-        <Button variant="secondary" onClick={onClose}>
+        <Button variant="outline" onClick={onClose}>
           Cancel
         </Button>
-        <Button variant="primary" onClick={handleSave}>
+        <Button variant="secondary" onClick={handleSave}>
           Save
         </Button>
       </div>

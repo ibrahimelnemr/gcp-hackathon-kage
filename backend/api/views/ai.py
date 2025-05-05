@@ -28,31 +28,9 @@ def generate_project_plan(request):
         # Parse the input data from the request body
         data = json.loads(request.body)
 
-        # Default mock data
-        default_project_name = "Default Project"
-        default_project_description = (
-            "Start Date: April 2025\n"
-            "Develop an AI agent that can extract text from a contract (word document) and compare it to a template. "
-            "The AI agent must be able to compare the contract to the template and provide differences where the contract "
-            "does not comply with the template and provide a proposal to the contract.\n"
-            "Platform: Azure OpenAI, Python backend, frontend.\n"
-            "Cloud: AWS. Requires AWS expertise for deployment and service integration.\n"
-            "Goal: Demonstrable proof-of-concept for company to test.\n"
-            "End Date: June 2025"
-        )
-        default_team_roles = [
-            {"name": "John", "level": "Analyst", "department": "AI and Data"},
-            {"name": "Jane", "level": "Senior Consultant", "department": "AI and Data"},
-            {"name": "Appleseed", "level": "Consultant", "department": "Cloud"},
-            {"name": "Bartholomew", "level": "Senior Consultant", "department": "Cloud"},
-            {"name": "Alice", "level": "Analyst", "department": "Fullstack"},
-            {"name": "Frank", "level": "Senior Consultant", "department": "Fullstack"},
-        ]
-
-        # Use provided data or fallback to defaults
-        project_name = data.get("project_name", default_project_name)
-        project_description = data.get("project_description", default_project_description)
-        team_roles = data.get("team_roles", default_team_roles)
+        project_name = data.get("project_name")
+        project_description = data.get("project_description")
+        team_roles = data.get("team_roles", [])
 
         # Validate team_roles format
         if not isinstance(team_roles, list) or not all(
@@ -71,9 +49,9 @@ def generate_project_plan(request):
         # Save the project to the database
         project = Project.objects.create(name=project_name, description=project_description)
 
-        # Create employees based on team_roles
+        # Create employees based on team_roles and associate them with the project
         for role in team_roles:
-            Employee.objects.create(
+            employee, _ = Employee.objects.get_or_create(
                 name=role["name"],
                 level=role["level"],
                 department=role["department"]

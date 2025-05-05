@@ -11,6 +11,8 @@ import AiChat from "./pages/AiChat";
 import NotFound from "./pages/NotFound";
 import Projects from "./pages/Projects";
 import ProjectTaskBoard from './pages/ProjectTaskBoard';
+import ProjectList from './pages/ProjectList';
+import Project from './pages/Project';
 
 const queryClient = new QueryClient();
 
@@ -26,7 +28,8 @@ const App = () => (
             <Route path="/project-manager" element={<ProjectManager />} />
             <Route path="/code-assistant" element={<CodeAssistant />} />
             <Route path="/ai-chat" element={<AiChat />} />
-            <Route path="/projects" element={<Projects />} />
+            <Route path="/projects" element={<ProjectList />} />
+            <Route path="/projects/:projectId" element={<Project />} />
             <Route path="/projects/:projectName" element={<ProjectTaskBoard />} />
           </Route>
           <Route path="*" element={<NotFound />} />

@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from ..models import Project, Task
 from ..serializers import ProjectSerializer, TaskSerializer
+from django.shortcuts import get_object_or_404
 
 class ProjectViewSet(ModelViewSet):
     queryset = Project.objects.all()
@@ -86,6 +87,43 @@ def delete_projects(request):
         Project.objects.all().delete()
 
         return JsonResponse({"message": "All projects, tasks, and associated data have been deleted successfully."}, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+@api_view(['GET'])
+def get_project_details(request, project_id):
+    """
+    Fetches the details of a specific project by its ID.
+    """
+    try:
+        # Fetch the project
+        project = get_object_or_404(Project, id=project_id)
+
+        # Fetch tasks related to the project
+        tasks = Task.objects.filter(project=project).select_related('employee')
+
+        # Prepare task details
+        task_list = []
+        for task in tasks:
+            task_list.append({
+                "task_id": task.id,
+                "status": task.status,
+                "description": task.description,
+                "employee_name": task.employee.name if task.employee else None,
+                "employee_level": task.employee.level if task.employee else None,
+                "employee_department": task.employee.department if task.employee else None,
+            })
+
+        # Prepare project details
+        project_details = {
+            "id": project.id,
+            "name": project.name,
+            "description": project.description,
+            "tasks": task_list,
+        }
+
+        return JsonResponse(project_details, safe=False, status=200)
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)

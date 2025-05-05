@@ -94,14 +94,32 @@ DATABASES = {
     #     'PORT': os.getenv('DB_PORT'),
     # }
 
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': os.getenv('DB_NAME2'),
-        'USER': os.getenv('DB_USER2'),
-        'PASSWORD': os.getenv('DB_PASSWORD2'),
-        'HOST': os.getenv('DB_HOST2'),
-        'PORT': os.getenv('DB_PORT2'),
-    }
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': os.getenv('DB_NAME2'),
+    #     'USER': os.getenv('DB_USER2'),
+    #     'PASSWORD': os.getenv('DB_PASSWORD2'),
+    #     'HOST': os.getenv('DB_HOST2'),
+    #     'PORT': os.getenv('DB_PORT2'),
+    # }
+
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': os.getenv('DB_NAME_LOCAL'),
+    #     'USER': os.getenv('DB_USER_LOCAL'),
+    #     'PASSWORD': os.getenv('DB_PASSWORD_LOCAL'),
+    #     'HOST': os.getenv('DB_HOST_LOCAL'),
+    #     'PORT': os.getenv('DB_PORT_LOCAL'),
+    # }
+
+    #   'default': {
+    #     'ENGINE': 'django.db.backends.postgresql',
+    #     'NAME': 'hackathon',
+    #     'USER': 'postgres',
+    #     'PASSWORD': 'postgres',
+    #     'HOST': 'localhost',
+    #     'PORT': 5432,
+    # }
 }
 
 REST_FRAMEWORK = {

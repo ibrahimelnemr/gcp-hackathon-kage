@@ -20,7 +20,7 @@ export function EditProjectPopup({ isOpen, onClose, project, onProjectUpdated }:
       const response = await fetch(`${BACKEND_URL}/rest/projects/${project.id}/`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name, description: description }),
+        body: JSON.stringify({ name, description }),
       });
 
       if (!response.ok) throw new Error('Failed to update project');
@@ -34,16 +34,28 @@ export function EditProjectPopup({ isOpen, onClose, project, onProjectUpdated }:
 
   return (
     <Popup isOpen={isOpen} onClose={onClose}>
-      <h2 className="text-xl font-bold mb-4">Edit Project</h2>
+      <h2 className="text-2xl font-bold mb-6 text-center">Edit Project</h2>
       <div className="space-y-4">
-        <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Project Name" />
-        <Input
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-          placeholder="Project Description"
-        />
+        <div>
+          <label className="block text-sm font-medium mb-1">Project Name</label>
+          <Input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Enter project name"
+            className="w-full"
+          />
+        </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Project Description</label>
+          <Input
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            placeholder="Enter project description"
+            className="w-full"
+          />
+        </div>
       </div>
-      <div className="mt-4 flex justify-end space-x-2">
+      <div className="mt-6 flex justify-end space-x-4">
         <Button variant="secondary" onClick={onClose}>
           Cancel
         </Button>

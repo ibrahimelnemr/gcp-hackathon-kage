@@ -6,6 +6,7 @@ import { BACKEND_URL } from '@/data/Data';
 import { usePopupHandler } from '@/hooks/usePopupHandler';
 import { EditProjectPopup } from '@/components/project/EditProjectPopup';
 import { IProject } from '@/data/Interfaces';
+import { Edit } from 'lucide-react'; // Import the edit icon
 
 export default function Project() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -21,9 +22,7 @@ export default function Project() {
       if (!response.ok) {
         throw new Error('Failed to fetch project');
       }
-      console.log(`Project - response`);
       const data = await response.json();
-      console.log(data);
       setProject(data);
     } catch (error) {
       console.error('Error fetching project:', error);
@@ -50,17 +49,17 @@ export default function Project() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <button
-        onClick={() => navigate('/projects')}
-        className="flex items-center text-muted-foreground mb-4 hover:text-kage-gray-900 transition-colors"
-      >
-        Back to Projects
-      </button>
-
-      <h1 className="text-3xl font-bold mb-4">{project.name}</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-3xl font-bold">{project.name}</h1>
+        <button
+          onClick={openPopup}
+          className="p-2 rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
+          aria-label="Edit Project"
+        >
+          <Edit className="h-5 w-5" />
+        </button>
+      </div>
       <p className="text-lg text-muted-foreground mb-6">{project.description}</p>
-
-      <Button onClick={openPopup}>Edit Project</Button>
 
       <EditProjectPopup
         isOpen={isOpen}

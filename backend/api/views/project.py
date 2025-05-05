@@ -186,3 +186,47 @@ def delete_project(request, project_id):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+@api_view(['DELETE'])
+def remove_employee_from_project(request, project_id, employee_id):
+    """
+    Removes an employee from a project.
+    """
+    try:
+        project = get_object_or_404(Project, id=project_id)
+        employee = get_object_or_404(Employee, id=employee_id)
+
+        # Remove the employee from the project
+        project.employees.remove(employee)
+
+        return JsonResponse({"message": "Employee removed from project successfully."}, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+@api_view(['POST'])
+def add_employee_to_project(request, project_id):
+    """
+    Adds an employee to a project.
+    """
+    try:
+        project = get_object_or_404(Project, id=project_id)
+        data = request.data
+
+        # Create or get the employee
+        employee, created = Employee.objects.get_or_create(
+            email=data.get("email"),
+            defaults={
+                "name": data.get("name"),
+                "level": data.get("level"),
+                "department": data.get("department"),
+            },
+        )
+
+        # Add the employee to the project
+        project.employees.add(employee)
+
+        return JsonResponse({"message": "Employee added to project successfully."}, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)

@@ -5,6 +5,7 @@ class Employee(models.Model):
     name = models.CharField(max_length=255)
     level = models.CharField(max_length=255)  # Added 'level' field
     department = models.CharField(max_length=255)
+    email = models.EmailField(unique=True, null=True) 
 
     def __str__(self):
         return self.name

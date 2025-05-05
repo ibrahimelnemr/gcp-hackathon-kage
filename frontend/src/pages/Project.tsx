@@ -6,8 +6,9 @@ import { BACKEND_URL } from '@/data/Data';
 import { usePopupHandler } from '@/hooks/usePopupHandler';
 import { EditProjectPopup } from '@/components/project/EditProjectPopup';
 import { IProject } from '@/data/Interfaces';
-import { Edit, Settings } from 'lucide-react'; // Import the edit and settings icons
+import { Edit, Settings, User } from 'lucide-react'; // Import the edit, settings, and user icons
 import { SettingsPopup } from '@/components/project/SettingsPopup';
+import { EmployeePopup } from '@/components/project/EmployeePopup';
 
 export default function Project() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -16,6 +17,7 @@ export default function Project() {
   const navigate = useNavigate();
   const { isOpen: isEditOpen, openPopup: openEditPopup, closePopup: closeEditPopup } = usePopupHandler();
   const { isOpen: isSettingsOpen, openPopup: openSettingsPopup, closePopup: closeSettingsPopup } = usePopupHandler();
+  const { isOpen: isEmployeePopupOpen, openPopup: openEmployeePopup, closePopup: closeEmployeePopup } = usePopupHandler();
 
   const fetchProject = async () => {
     setLoading(true);
@@ -70,6 +72,13 @@ export default function Project() {
           >
             <Settings className="h-5 w-5" />
           </button>
+          <button
+            onClick={openEmployeePopup}
+            className="p-2 rounded-full bg-muted hover:bg-muted/80 text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Manage Employees"
+          >
+            <User className="h-5 w-5" />
+          </button>
         </div>
       </div>
       <p className="text-lg text-muted-foreground mb-6">{project.description}</p>
@@ -85,6 +94,14 @@ export default function Project() {
         isOpen={isSettingsOpen}
         onClose={closeSettingsPopup}
         projectId={project.id}
+      />
+
+      <EmployeePopup
+        isOpen={isEmployeePopupOpen}
+        onClose={closeEmployeePopup}
+        projectId={project.id}
+        employees={project.employees}
+        onEmployeeUpdated={fetchProject}
       />
 
       <TaskBoard tasks={project.tasks} />

@@ -3,15 +3,15 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ChevronRight, ChevronLeft, Clock, CheckCircle, Circle } from 'lucide-react';
-import { Task } from '@/data/Interfaces';
+import { ITask } from '@/data/Interfaces';
 
 
 interface TaskBoardProps {
-  tasks: Task[];
+  tasks: ITask[];
 }
 
 export function TaskBoard({ tasks: initialTasks }: TaskBoardProps) {
-  const [tasks, setTasks] = useState<Task[]>(initialTasks);
+  const [tasks, setTasks] = useState<ITask[]>(initialTasks);
 
   // Move task to next status
   const moveTaskForward = (taskId: number) => {

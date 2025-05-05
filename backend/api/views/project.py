@@ -164,3 +164,25 @@ def manage_project_employees(request, project_id):
 
     except Exception as e:
         return Response({"error": str(e)}, status=500)
+
+@api_view(['DELETE'])
+def delete_project(request, project_id):
+    """
+    Deletes a project and its associated tasks and employees.
+    """
+    try:
+        project = get_object_or_404(Project, id=project_id)
+
+        # Delete all tasks associated with the project
+        Task.objects.filter(project=project).delete()
+
+        # Remove the association of employees with the project
+        project.employees.clear()
+
+        # Delete the project itself
+        project.delete()
+
+        return JsonResponse({"message": "Project deleted successfully."}, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)

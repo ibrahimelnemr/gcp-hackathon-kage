@@ -103,6 +103,9 @@ def get_project_details(request, project_id):
         # Fetch tasks related to the project
         tasks = Task.objects.filter(project=project).select_related('employee')
 
+        # Fetch employees related to the project
+        employees = project.employees.all()
+
         # Prepare task details
         task_list = []
         for task in tasks:
@@ -115,12 +118,23 @@ def get_project_details(request, project_id):
                 "employee_department": task.employee.department if task.employee else None,
             })
 
+        # Prepare employee details
+        employee_list = []
+        for employee in employees:
+            employee_list.append({
+                "id": employee.id,
+                "name": employee.name,
+                "level": employee.level,
+                "department": employee.department,
+            })
+
         # Prepare project details
         project_details = {
             "id": project.id,
             "name": project.name,
             "description": project.description,
             "tasks": task_list,
+            "employees": employee_list,  # Include employees
         }
 
         return JsonResponse(project_details, safe=False, status=200)

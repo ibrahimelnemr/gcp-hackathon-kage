@@ -3,11 +3,12 @@ import { Popup } from '@/components/ui/Popup';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { BACKEND_URL } from '@/data/Data';
+import { IProject } from '@/data/Interfaces';
 
 interface EditProjectPopupProps {
   isOpen: boolean;
   onClose: () => void;
-  project: { id: number; name: string; description: string };
+  project: IProject;
   onProjectUpdated: () => void;
 }
 
@@ -53,6 +54,22 @@ export function EditProjectPopup({ isOpen, onClose, project, onProjectUpdated }:
             placeholder="Enter project description"
             className="w-full"
           />
+        </div>
+        <div>
+          <h3 className="text-lg font-semibold mb-2">Employees</h3>
+          <ul className="space-y-2">
+            {project.employees.map((employee) => (
+              <li
+                key={employee.id}
+                className="p-3 border rounded-md bg-gray-100 dark:bg-gray-800"
+              >
+                <p className="font-medium">{employee.name}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {employee.level} - {employee.department}
+                </p>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
       <div className="mt-6 flex justify-end space-x-4">

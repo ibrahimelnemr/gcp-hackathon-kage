@@ -78,6 +78,7 @@ def generate_project_plan(request):
                 level=role["level"],
                 department=role["department"]
             )
+            project.employees.add(employee)  # Associate the employee with the project
 
         # Create tasks based on the project plan
         for task in kage_project_plan.get("tasks", []):
@@ -95,7 +96,7 @@ def generate_project_plan(request):
             )
 
         # Return the generated project plan as a JSON response
-        return JsonResponse({"generated_plan": kage_project_plan}, safe=False, status=200)
+        return JsonResponse({"message": "Project and employees created successfully."}, status=200)
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)

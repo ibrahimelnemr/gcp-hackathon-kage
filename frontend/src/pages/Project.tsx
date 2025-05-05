@@ -23,6 +23,8 @@ export default function Project() {
         throw new Error('Failed to fetch project');
       }
       const data = await response.json();
+      console.log(`Project.tsx - fetchProject`);
+      console.log(data);
       setProject(data);
     } catch (error) {
       console.error('Error fetching project:', error);

@@ -15,6 +15,7 @@ interface TaskBoardProps {
 
 export function TaskBoard({ tasks: initialTasks, projectId }: TaskBoardProps) {
   const [tasks, setTasks] = useState<ITask[]>(initialTasks);
+  const [loadingTaskId, setLoadingTaskId] = useState<number | null>(null); // Track the loading state for a specific task
   const { isOpen: isEditTaskOpen, openPopup: openEditTaskPopup, closePopup: closeEditTaskPopup } = usePopupHandler();
   const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
 
@@ -53,7 +54,8 @@ export function TaskBoard({ tasks: initialTasks, projectId }: TaskBoardProps) {
     }
 
     try {
-      await fetch(`${BACKEND_URL}/tasks/${taskId}/update/`, {  // Updated URL
+      setLoadingTaskId(taskId); // Set the loading state for the task
+      await fetch(`${BACKEND_URL}/tasks/${taskId}/update/`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
@@ -61,6 +63,8 @@ export function TaskBoard({ tasks: initialTasks, projectId }: TaskBoardProps) {
       fetchTasks(); // Refresh tasks after updating
     } catch (error) {
       console.error('Error updating task status:', error);
+    } finally {
+      setLoadingTaskId(null); // Clear the loading state
     }
   };
 
@@ -88,8 +92,13 @@ export function TaskBoard({ tasks: initialTasks, projectId }: TaskBoardProps) {
                         size="icon"
                         onClick={() => moveTask(task.task_id, 'forward')}
                         className="h-8 w-8"
+                        disabled={loadingTaskId === task.task_id} // Disable button while loading
                       >
-                        <ChevronRight className="h-4 w-4" />
+                        {loadingTaskId === task.task_id ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-yellow-500"></div>
+                        ) : (
+                          <ChevronRight className="h-4 w-4" />
+                        )}
                       </Button>
                       <Button
                         variant="ghost"
@@ -134,16 +143,26 @@ export function TaskBoard({ tasks: initialTasks, projectId }: TaskBoardProps) {
                         size="icon"
                         onClick={() => moveTask(task.task_id, 'backward')}
                         className="h-8 w-8"
+                        disabled={loadingTaskId === task.task_id} // Disable button while loading
                       >
-                        <ChevronLeft className="h-4 w-4" />
+                        {loadingTaskId === task.task_id ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-blue-500"></div>
+                        ) : (
+                          <ChevronLeft className="h-4 w-4" />
+                        )}
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => moveTask(task.task_id, 'forward')}
                         className="h-8 w-8"
+                        disabled={loadingTaskId === task.task_id} // Disable button while loading
                       >
-                        <ChevronRight className="h-4 w-4" />
+                        {loadingTaskId === task.task_id ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-blue-500"></div>
+                        ) : (
+                          <ChevronRight className="h-4 w-4" />
+                        )}
                       </Button>
                       <Button
                         variant="ghost"
@@ -188,8 +207,13 @@ export function TaskBoard({ tasks: initialTasks, projectId }: TaskBoardProps) {
                         size="icon"
                         onClick={() => moveTask(task.task_id, 'backward')}
                         className="h-8 w-8"
+                        disabled={loadingTaskId === task.task_id} // Disable button while loading
                       >
-                        <ChevronLeft className="h-4 w-4" />
+                        {loadingTaskId === task.task_id ? (
+                          <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-green-500"></div>
+                        ) : (
+                          <ChevronLeft className="h-4 w-4" />
+                        )}
                       </Button>
                       <Button
                         variant="ghost"

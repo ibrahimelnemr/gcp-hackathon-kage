@@ -55,13 +55,16 @@ export function EmployeePopup({ isOpen, onClose, projectId, employees, onEmploye
   return (
     <>
       <Popup isOpen={isOpen} onClose={onClose}>
-        <h2 className="text-2xl font-bold mb-6 text-center">Manage Employees</h2>
+        <h2 className="text-2xl font-bold mb-6 text-center text-foreground">Manage Employees</h2>
         <ul className="space-y-4">
           {employees.map((employee) => (
-            <li key={employee.id} className="flex justify-between items-center p-3 border rounded-md bg-gray-100 dark:bg-gray-800">
+            <li
+              key={employee.id}
+              className="flex justify-between items-center p-3 border border-border rounded-md bg-card text-card-foreground"
+            >
               <div>
                 <p className="font-medium">{employee.name}</p>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-muted-foreground">
                   {employee.level} - {employee.department} - {employee.email}
                 </p>
               </div>
@@ -90,7 +93,7 @@ export function EmployeePopup({ isOpen, onClose, projectId, employees, onEmploye
 
       {/* Confirmation Popup */}
       <Popup isOpen={isConfirmOpen} onClose={closeConfirmPopup}>
-        <h2 className="text-xl font-bold mb-4 text-center">Confirm Removal</h2>
+        <h2 className="text-xl font-bold mb-4 text-center text-foreground">Confirm Removal</h2>
         <p className="text-sm text-muted-foreground mb-6 text-center">
           Are you sure you want to remove this employee from the project?
         </p>
@@ -106,7 +109,7 @@ export function EmployeePopup({ isOpen, onClose, projectId, employees, onEmploye
 
       {/* Add Employee Popup */}
       <Popup isOpen={isAddEmployeeOpen} onClose={closeAddEmployeePopup}>
-        <h2 className="text-xl font-bold mb-4 text-center">Add Employee</h2>
+        <h2 className="text-xl font-bold mb-4 text-center text-foreground">Add Employee</h2>
         <form
           onSubmit={(e) => {
             e.preventDefault();
@@ -120,10 +123,10 @@ export function EmployeePopup({ isOpen, onClose, projectId, employees, onEmploye
           }}
         >
           <div className="space-y-4">
-            <Input name="name" placeholder="Name" required />
-            <Input name="level" placeholder="Level (e.g., Senior Consultant)" required />
-            <Input name="department" placeholder="Department" required />
-            <Input name="email" type="email" placeholder="Email" required />
+            <Input name="name" placeholder="Name" required className="w-full bg-card text-card-foreground border border-border rounded-md p-2" />
+            <Input name="level" placeholder="Level (e.g., Senior Consultant)" required className="w-full bg-card text-card-foreground border border-border rounded-md p-2" />
+            <Input name="department" placeholder="Department" required className="w-full bg-card text-card-foreground border border-border rounded-md p-2" />
+            <Input name="email" type="email" placeholder="Email" required className="w-full bg-card text-card-foreground border border-border rounded-md p-2" />
           </div>
           <div className="mt-6 flex justify-end space-x-4">
             <Button variant="outline" onClick={closeAddEmployeePopup}>

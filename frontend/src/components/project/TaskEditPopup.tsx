@@ -62,23 +62,23 @@ export function TaskEditPopup({ isOpen, onClose, task, projectId, onTaskUpdated 
 
   return (
     <Popup isOpen={isOpen} onClose={onClose}>
-      <h2 className="text-xl font-bold mb-4 text-center">Edit Task</h2>
+      <h2 className="text-xl font-bold mb-4 text-center text-foreground">Edit Task</h2>
       <div className="space-y-4">
         <div>
-          <label className="block text-sm font-medium mb-1">Task Description</label>
+          <label className="block text-sm font-medium mb-1 text-foreground">Task Description</label>
           <Input
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Enter task description"
-            className="w-full"
+            className="w-full bg-card text-card-foreground border border-border rounded-md p-2"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-1">Assign to Employee</label>
+          <label className="block text-sm font-medium mb-1 text-foreground">Assign to Employee</label>
           <select
             value={selectedEmployee || ''}
             onChange={(e) => setSelectedEmployee(Number(e.target.value))}
-            className="w-full border rounded-md p-2"
+            className="w-full bg-card text-card-foreground border border-border rounded-md p-2"
           >
             <option value="">Unassigned</option>
             {employees.map((employee) => (

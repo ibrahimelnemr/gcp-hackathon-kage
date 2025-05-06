@@ -3,6 +3,7 @@ export interface ITask {
     description: string;
     status: "to-do" | "in-progress" | "done";
     employee_name: string;
+    employee_id?: number;
   }
   
 

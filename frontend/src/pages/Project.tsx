@@ -104,7 +104,7 @@ export default function Project() {
         onEmployeeUpdated={fetchProject}
       />
 
-      <TaskBoard tasks={project.tasks} />
+      <TaskBoard tasks={project.tasks} projectId={Number(projectId)} /> {/* Pass projectId */}
     </div>
   );
 }

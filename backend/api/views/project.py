@@ -13,9 +13,23 @@ class ProjectViewSet(ModelViewSet):
 
 @api_view(['GET'])
 def get_tasks(request, project_id):
-    tasks = Task.objects.filter(project_id=project_id)
-    serializer = TaskSerializer(tasks, many=True)
-    return Response(serializer.data)
+    try:
+        project = get_object_or_404(Project, id=project_id)
+        tasks = Task.objects.filter(project=project).select_related('employee')
+
+        task_list = []
+        for task in tasks:
+            task_list.append({
+                "task_id": task.id,  # Ensure task_id is included
+                "description": task.description,
+                "status": task.status,
+                "employee_name": task.employee.name if task.employee else None,
+                "employee_id": task.employee.id if task.employee else None,
+            })
+
+        return JsonResponse(task_list, safe=False, status=200)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
 
 @api_view(['POST'])
 def create_project(request):
@@ -228,5 +242,54 @@ def add_employee_to_project(request, project_id):
 
         return JsonResponse({"message": "Employee added to project successfully."}, status=200)
 
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+@api_view(['PATCH'])
+def update_task(request, task_id):
+    """
+    Updates a task's details, including status and assigned employee.
+    """
+    try:
+        print(f"Updating task with ID: {task_id}")  # Debug log
+        task = get_object_or_404(Task, id=task_id)
+        data = request.data
+
+        # Update task status
+        if "status" in data:
+            task.status = data["status"]
+
+        # Update assigned employee
+        if "employee_id" in data:
+            employee = get_object_or_404(Employee, id=data["employee_id"])
+            task.employee = employee
+
+        task.save()
+
+        return JsonResponse({"message": "Task updated successfully."}, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+@api_view(['GET'])
+def get_project_employees(request, project_id):
+    """
+    Fetches the list of employees associated with a project.
+    """
+    try:
+        project = get_object_or_404(Project, id=project_id)
+        employees = project.employees.all()
+
+        employee_list = []
+        for employee in employees:
+            employee_list.append({
+                "id": employee.id,
+                "name": employee.name,
+                "level": employee.level,
+                "department": employee.department,
+                "email": employee.email,
+            })
+
+        return JsonResponse(employee_list, safe=False, status=200)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)

@@ -12,11 +12,10 @@ export function AppLayout() {
       </main>
       <footer className="py-4 border-t border-border">
         <div className="container flex flex-col items-center justify-center px-4 mx-auto space-y-2">
-          <div className="text-sm text-muted-foreground">
-            KAGE the Shadow Leader | AI-powered Guidance
-          </div>
+          {/* <div className="text-sm text-muted-foreground">
+          </div> */}
           <div className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} KAGE Technologies
+            © {new Date().getFullYear()} Deloitte Innovation Hub
           </div>
         </div>
       </footer>

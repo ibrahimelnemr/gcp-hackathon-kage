@@ -1,5 +1,6 @@
 from django.urls import path
 from ..views.project import *
+from ..views.gitsync import *
 
 app_name = 'project'
 
@@ -14,5 +15,9 @@ urlpatterns = [
     path('project/<int:project_id>/employees/<int:employee_id>/remove/', remove_employee_from_project, name='remove_employee_from_project'),
     path('project/<int:project_id>/employees/add/', add_employee_to_project, name='add_employee_to_project'),
     path('project/<int:project_id>/employees/list/', get_project_employees, name='get_project_employees'),  # New endpoint
-    path('tasks/<int:task_id>/update/', update_task, name='update_task'),  # Correct pattern
+    path('tasks/<int:task_id>/update/', update_task, name='update_task'), 
+    path('project/github', index),
+    path('project/github/token/', manage_token),
+    path('project/github/repos/', list_repos),
+    path('project/github/repos/<str:repo_name>/summary/', repo_summary),
 ]

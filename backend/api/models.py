@@ -34,3 +34,10 @@ class Task(models.Model):
 
     def __str__(self):
         return self.description
+
+
+class GitHubToken(models.Model):
+    encrypted_token = models.TextField()
+
+    def __str__(self):
+        return "GitHub Token"

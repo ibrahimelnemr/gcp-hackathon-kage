@@ -1,7 +1,6 @@
-
 import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Menu, X, Terminal, Users, MessageSquare, Home } from 'lucide-react';
+import { Menu, X, Terminal, Users, MessageSquare, Home, GitBranch } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 
 export function Navbar() {
@@ -16,9 +15,9 @@ export function Navbar() {
 
     { path: '/projects', label: 'Projects', icon: <Users className="h-4 w-4 mr-2" /> },
 
-    { path: 'https://console.cloud.google.com/vertex-ai/studio/multimodal?endpointId=7663865425947525120&region=us-central1&cloudshell=true&invt=AbuvLg&project=nse-gcp-ema-tt-ec0b4-sbx-1&pli=1', label: 'Code Assistant', icon: <Terminal className="h-4 w-4 mr-2" /> },
+    // { path: 'https://console.cloud.google.com/vertex-ai/studio/multimodal?endpointId=7663865425947525120&region=us-central1&cloudshell=true&invt=AbuvLg&project=nse-gcp-ema-tt-ec0b4-sbx-1&pli=1', label: 'Code Assistant', icon: <Terminal className="h-4 w-4 mr-2" /> },
 
-    // { path: '/ai-chat', label: 'AI Chat', icon: <MessageSquare className="h-4 w-4 mr-2" /> },
+    { path: '/github', label: 'Git Integration', icon: <GitBranch className="h-4 w-4 mr-2" /> }, // New link
   ];
   
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);

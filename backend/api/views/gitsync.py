@@ -89,3 +89,20 @@ def repo_summary(request, repo_name):
         return JsonResponse(summary)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+
+@csrf_exempt
+def check_github_token(request):
+    """
+    Checks if a GitHub token exists and lists repositories if it does.
+    """
+    token = get_token()
+    if not token:
+        return JsonResponse({"exists": False}, status=200)
+
+    try:
+        g = Github(token)
+        repos = g.get_user().get_repos()
+        data = [{"name": r.name, "url": r.html_url, "description": r.description} for r in repos]
+        return JsonResponse({"exists": True, "repos": data}, safe=False)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)

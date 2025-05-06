@@ -17,6 +17,7 @@ urlpatterns = [
     path('project/<int:project_id>/employees/list/', get_project_employees, name='get_project_employees'),  # New endpoint
     path('tasks/<int:task_id>/update/', update_task, name='update_task'), 
     path('project/github', index),
+    path('project/github/check-token/', check_github_token, name='check_github_token'),
     path('project/github/token/', manage_token),
     path('project/github/repos/', list_repos),
     path('project/github/repos/<str:repo_name>/summary/', repo_summary),

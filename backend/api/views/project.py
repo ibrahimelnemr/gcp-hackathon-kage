@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
-from ..models import Project, Task, Employee
+from ..models import Project, Task, Employee, GitHubToken, GitHubRepository
 from ..serializers import ProjectSerializer, TaskSerializer
 from django.shortcuts import get_object_or_404
 
@@ -291,5 +291,55 @@ def get_project_employees(request, project_id):
             })
 
         return JsonResponse(employee_list, safe=False, status=200)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+@api_view(['POST'])
+def link_project_to_repo(request, project_id):
+    """
+    Link a project to a GitHub repository.
+    """
+    # user = request.user
+    repo_name = request.data.get('repo_name')
+    if not repo_name:
+        return JsonResponse({"error": "Repository name is required"}, status=400)
+
+    try:
+        repo = GitHubRepository.objects.get(github_url=f'https://github.com/{repo_name}')
+        project = Project.objects.get(id=project_id)
+        project.github_repo = repo
+        project.save()
+        return JsonResponse({"message": "Project linked to repository successfully."}, status=200)
+    except GitHubToken.DoesNotExist:
+        return JsonResponse({"error": "GitHub token not found."}, status=404)
+    except GitHubRepository.DoesNotExist:
+        return JsonResponse({"error": "Repository not found."}, status=404)
+    except Project.DoesNotExist:
+        return JsonResponse({"error": "Project not found."}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+@api_view(['GET'])
+def get_projects_with_repos(request):
+    """
+    Fetches all projects and their linked GitHub repositories.
+    """
+    try:
+        projects = Project.objects.all()
+        response_data = []
+        for project in projects:
+            if project.github_repo:
+                repo_url = project.github_repo.github_url
+            else:
+                repo_url = None
+
+            response_data.append({
+                "id": project.id,
+                "name": project.name,
+                "description": project.description,
+                "repo_url": repo_url,
+            })
+        return JsonResponse(response_data, safe=False, status=200)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)

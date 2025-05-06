@@ -7,5 +7,6 @@ urlpatterns = [
     path('general/', include('api.urls.general')),
     path('project/', include(('api.urls.project', 'project'))),
     path('ai/', include(('api.urls.ai', 'ai'))),
-    path('gcp/', include(('api.urls.gcp', 'gcp'))),
+    path('gcp/', include(('api.urls.gcp', 'gcp'))),   
+    path('github/', include(('api.urls.github', 'github'))),
 ]

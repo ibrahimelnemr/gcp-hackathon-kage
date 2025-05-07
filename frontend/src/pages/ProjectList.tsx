@@ -5,27 +5,30 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BACKEND_URL } from '@/data/Data';
 import { IProject } from '@/data/Interfaces';
+import HttpHook from '@/hooks/HttpHook';
 
 export default function ProjectList() {
   const [projects, setProjects] = useState<IProject[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { sendRequest } = HttpHook();
+
+  const fetchProjects = async () => {
+    setLoading(true);
+    try {
+      const data = await sendRequest({
+        method: 'get',
+        url: `${BACKEND_URL}/rest/projects`,
+      });
+      setProjects(data);
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchProjects = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(`${BACKEND_URL}/rest/projects`);
-        if (!response.ok) throw new Error('Failed to fetch projects');
-        const data = await response.json();
-        setProjects(data);
-      } catch (error) {
-        console.error('Error fetching projects:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchProjects();
   }, []);
 

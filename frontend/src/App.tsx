@@ -16,6 +16,7 @@ import GitIntegration from "./pages/GitIntegration";
 import Settings from './pages/Settings';
 import { AIAssist } from '@/components/github/AIAssist';
 import { RepositoryAnalysis } from '@/components/github/RepositoryAnalysis';
+import CodeOptimization from './pages/CodeOptimization';
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/settings" element={<Settings />} />
             <Route path="/projects/:projectId/ai-assist" element={<AIAssist />} />
             <Route path="/projects/:projectId/analyze" element={<RepositoryAnalysis />} />
+            <Route path="/code-optimization" element={<CodeOptimization />} />
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

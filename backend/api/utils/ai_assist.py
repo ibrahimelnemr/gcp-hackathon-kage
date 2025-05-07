@@ -49,10 +49,17 @@ class AIAssist:
         non_code_files = ["package-lock.json", "yarn.lock", ".gitignore"]
         code_extensions = [".py", ".js", ".ts", ".tsx", ".java", ".html", ".css", ".json"]
 
-        if file_name in non_code_files:
+        # Extract the base name of the file
+        base_name = os.path.basename(file_name)
+
+        # Check if the base name matches any non-code files
+        if base_name in non_code_files:
             return False
+
+        # Check if the file has a valid code extension
         if any(file_name.endswith(ext) for ext in code_extensions):
             return True
+
         return False
 
     def fetch_repository_files(self, repo_url: str) -> List[Dict[str, str]]:

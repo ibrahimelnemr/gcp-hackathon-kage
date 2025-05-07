@@ -81,43 +81,6 @@ export default function ProjectManager() {
     setFormError('');
     return true;
   };
-
-  async function submitProjectMock(projectData: any): Promise<any> {
-    // Simulate API call delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Mock response data
-    return {
-      generated_plan: {
-        tasks: [
-          {
-            task_id: 1,
-            description: "Run Axe accessibility scan on the portal.",
-            status: "to-do",
-            employee_name: "John Doe"
-          },
-          {
-            task_id: 2,
-            description: "Review login flow for keyboard navigation issues.",
-            status: "in-progress",
-            employee_name: "Jane Smith"
-          },
-          {
-            task_id: 3,
-            description: "Review dashboard for screen reader compatibility.",
-            status: "done",
-            employee_name: "Alice Johnson"
-          },
-          {
-            task_id: 4,
-            description: "Identify color contrast issues across the portal.",
-            status: "to-do",
-            employee_name: "Frank Brown"
-          }
-        ]
-      }
-    };
-  }
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,7 +96,7 @@ export default function ProjectManager() {
     };
   
     try {
-      const response = await sendRequest<any>({
+      const response = await sendRequest({
         method: 'post',
         url: `${BACKEND_URL}/ai/generate`,
         body: projectData,

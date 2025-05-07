@@ -6,6 +6,7 @@ from rest_framework.viewsets import ModelViewSet
 from ..models import Project, Task, Employee, GitHubToken, GitHubRepository
 from ..serializers import ProjectSerializer, TaskSerializer
 from django.shortcuts import get_object_or_404
+from ..utils import get_token, get_token_obj
 
 class ProjectViewSet(ModelViewSet):
     queryset = Project.objects.all()
@@ -297,28 +298,39 @@ def get_project_employees(request, project_id):
 @api_view(['POST'])
 def link_project_to_repo(request, project_id):
     """
-    Link a project to a GitHub repository.
+    Link a project to a GitHub repository using its URL.
     """
-    # user = request.user
-    repo_name = request.data.get('repo_name')
-    if not repo_name:
-        return JsonResponse({"error": "Repository name is required"}, status=400)
+    github_url = request.data.get('github_url')
+    if not github_url:
+        return JsonResponse({"error": "GitHub URL is required"}, status=400)
+    
+    token = get_token_obj()
 
     try:
-        repo = GitHubRepository.objects.get(github_url=f'https://github.com/{repo_name}')
+        # Check if the repository already exists
+        repo, created = GitHubRepository.objects.get_or_create(
+            token = token,
+            github_url=github_url
+        )
+
+        # Fetch the project
         project = Project.objects.get(id=project_id)
+
+        # Link the repository to the project
         project.github_repo = repo
         project.save()
-        return JsonResponse({"message": "Project linked to repository successfully."}, status=200)
-    except GitHubToken.DoesNotExist:
-        return JsonResponse({"error": "GitHub token not found."}, status=404)
-    except GitHubRepository.DoesNotExist:
-        return JsonResponse({"error": "Repository not found."}, status=404)
+
+        if created:
+            message = "Repository created and linked to the project successfully."
+        else:
+            message = "Repository linked to the project successfully."
+
+        return JsonResponse({"message": message}, status=200)
+
     except Project.DoesNotExist:
         return JsonResponse({"error": "Project not found."}, status=404)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
-
 
 @api_view(['GET'])
 def get_projects_with_repos(request):

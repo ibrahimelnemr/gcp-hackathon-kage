@@ -1,23 +1,27 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { BACKEND_URL } from '@/data/Data';
 import { RepositoryAnalysis } from '@/components/github/RepositoryAnalysis';
 import { AIAssist } from '@/components/github/AIAssist';
+import HttpHook from '@/hooks/HttpHook';
+import { BACKEND_URL } from '@/data/Data';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 export default function GitIntegration() {
+  const { sendRequest, loading: httpLoading, httpError } = HttpHook();
   const [projects, setProjects] = useState([]);
   const [repos, setRepos] = useState([]);
-  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
   const [selectedRepo, setSelectedRepo] = useState<string | null>(null);
   const [view, setView] = useState<'main' | 'analyze' | 'assist'>('main');
   const [loading, setLoading] = useState(false);
 
   const fetchProjects = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/project/repos/`);
-      const data = await response.json();
-      setProjects(data);
+      const data = await sendRequest({
+        method: 'get',
+        url: `${BACKEND_URL}/project/repos/`,
+      });
+      if (data) setProjects(data);
     } catch (error) {
       console.error('Error fetching projects:', error);
     }
@@ -25,25 +29,29 @@ export default function GitIntegration() {
 
   const fetchRepos = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/github/repos/`);
-      const data = await response.json();
-      setRepos(data);
+      const data = await sendRequest({
+        method: 'get',
+        url: `${BACKEND_URL}/github/repos/`,
+      });
+      if (data) setRepos(data);
     } catch (error) {
       console.error('Error fetching repositories:', error);
     }
   };
 
-  const connectRepo = async (projectId: number, repoName: string) => {
+  const connectRepo = async (projectId: number, githubUrl: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/project/${projectId}/link-repo/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ repo_name: repoName }),
+      const response = await sendRequest({
+        method: 'post',
+        url: `${BACKEND_URL}/project/${projectId}/link-repo/`,
+        body: { github_url: githubUrl }, // Send the GitHub URL
       });
-      if (!response.ok) throw new Error('Failed to connect repository');
-      alert('Repository connected successfully!');
-      fetchProjects(); // Refresh projects
+
+      if (response) {
+        alert('Repository connected successfully!');
+        fetchProjects(); // Refresh projects
+      }
     } catch (error) {
       console.error('Error connecting repository:', error);
     } finally {
@@ -85,17 +93,17 @@ export default function GitIntegration() {
                   </SelectTrigger>
                   <SelectContent>
                     {repos.map((repo) => (
-                      <SelectItem key={repo.name} value={repo.name}>
-                        {repo.name}
+                      <SelectItem key={repo.url} value={repo.url}>
+                        {repo.name} ({repo.url})
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
                 <Button
                   onClick={() => connectRepo(project.id, selectedRepo!)}
-                  disabled={!selectedRepo || loading}
+                  disabled={!selectedRepo || loading || httpLoading}
                 >
-                  {loading ? 'Connecting...' : 'Connect Repository'}
+                  {loading || httpLoading ? 'Connecting...' : 'Connect Repository'}
                 </Button>
               </div>
             )}

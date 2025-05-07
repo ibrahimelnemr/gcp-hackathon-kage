@@ -8,7 +8,7 @@ export default function HttpHook() {
 
   type Method = "post" | "get" | "put" | "delete";
 
-  const sendRequest = async <T>({
+  const sendRequest = async ({
     method,
     url,
     body
@@ -16,7 +16,7 @@ export default function HttpHook() {
     method: Method;
     url: string;
     body?: any;
-  }): Promise<T | null> => {
+  }): Promise<any> => {
     setLoading(true);
     setHttpError(null);
 
@@ -40,7 +40,7 @@ export default function HttpHook() {
           throw new Error(`Unsupported method: ${method}`);
       }
 
-      return response.data as T;
+      return response.data;
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "An unknown error occurred";

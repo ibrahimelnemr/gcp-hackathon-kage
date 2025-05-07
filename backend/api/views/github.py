@@ -6,23 +6,12 @@ from github import Github
 import json
 from rest_framework.decorators import api_view
 # from django.contrib.auth.models import User
+from ..utils import get_token, get_token_obj
 
 encryptor = TokenEncryptor()
 
 def index(request):
     return JsonResponse({"message": "GitHub Integration API"})
-
-def get_token():
-    token_obj = GitHubToken.objects.first()
-    if not token_obj:
-        return None
-    return encryptor.decrypt(token_obj.encrypted_token)
-
-def get_token_obj():
-    token_obj = GitHubToken.objects.first()
-    if not token_obj:
-        return None
-    return token_obj
 
 @csrf_exempt
 def manage_token(request):

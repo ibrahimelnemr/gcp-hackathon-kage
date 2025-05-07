@@ -38,12 +38,15 @@ class ProjectPlan(BaseModel):
 
 class Kage:
     def __init__(self):
-        self.GCP_PROJECT_ID = os.getenv("GCP_PROJECT_ID")
-        self.GCP_LOCATION = os.getenv("GCP_LOCATION", "us-central1")
-        self.VERTEX_MODEL_NAME = os.getenv("VERTEX_MODEL_NAME", "gemini-1.5-flash-001")
+        # Dynamically set the service account for Kage
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("KAGE_GOOGLE_APPLICATION_CREDENTIALS")
+
+        self.GCP_PROJECT_ID = os.getenv("KAGE_GCP_PROJECT_ID")
+        self.GCP_LOCATION = os.getenv("KAGE_GCP_LOCATION", "us-central1")
+        self.VERTEX_MODEL_NAME = os.getenv("KAGE_VERTEX_MODEL_NAME", "gemini-1.5-flash-001")
 
         if not self.GCP_PROJECT_ID:
-            raise ValueError("GCP Project ID not found. Please set GCP_PROJECT_ID in your .env file or environment.")
+            raise ValueError("GCP Project ID not found. Please set KAGE_GCP_PROJECT_ID in your .env file or environment.")
 
     def setup_logging(self, project_name: str) -> Tuple[logging.Logger, str]:
         try:

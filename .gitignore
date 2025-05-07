@@ -3,5 +3,6 @@ venv
 backend/centered*
 logs
 output_plans
-backend/gcp.json
-backend/gcp2.json
+backend/secret
+backend/.env
+backend/gcp*

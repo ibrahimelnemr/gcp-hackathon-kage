@@ -12,14 +12,19 @@ from google.genai import types
 import base64
 
 def generate(input):
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("CODE_OPTIMIZER_GOOGLE_APPLICATION_CREDENTIALS")
+
     client = genai.Client(
         vertexai=True,
-        project="835507075780",
-        location="us-central1",
+        project=os.getenv("CODE_OPTIMIZER_GCP_PROJECT_ID"),
+        location=os.getenv("CODE_OPTIMIZER_GCP_LOCATION"),
     )
 
-        
-    model = "projects/835507075780/locations/us-central1/endpoints/124751688799092736"
+    model = "projects/{}/locations/{}/endpoints/124751688799092736".format(
+        os.getenv("CODE_OPTIMIZER_GCP_PROJECT_ID"),
+        os.getenv("CODE_OPTIMIZER_GCP_LOCATION"),
+    )
+
     contents = [
         types.Content(
             role="user",

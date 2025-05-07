@@ -1,6 +1,6 @@
 import os
 from cryptography.fernet import Fernet
-from .models import GitHubToken, Project, GitHubRepository
+from ..models import GitHubToken, Project, GitHubRepository
 
 class TokenEncryptor:
     def __init__(self):

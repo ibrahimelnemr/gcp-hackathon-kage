@@ -1,12 +1,12 @@
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from ..models import GitHubToken, Project, GitHubRepository
-from ..utils import TokenEncryptor
+from ..utils.token_utils import TokenEncryptor
 from github import Github
 import json
 from rest_framework.decorators import api_view
 # from django.contrib.auth.models import User
-from ..utils import get_token, get_token_obj
+from ..utils.token_utils import get_token, get_token_obj
 
 encryptor = TokenEncryptor()
 

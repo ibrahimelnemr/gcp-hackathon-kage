@@ -6,7 +6,7 @@ from rest_framework.viewsets import ModelViewSet
 from ..models import Project, Task, Employee, GitHubToken, GitHubRepository
 from ..serializers import ProjectSerializer, TaskSerializer
 from django.shortcuts import get_object_or_404
-from ..utils import get_token, get_token_obj
+from ..utils.token_utils import get_token, get_token_obj
 
 class ProjectViewSet(ModelViewSet):
     queryset = Project.objects.all()

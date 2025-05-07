@@ -6,11 +6,11 @@ import vertexai
 from google.cloud import aiplatform
 from google import genai
 from google.genai import types
-from ..kage import Kage
+from ..utils.kage import Kage
 import json
 from dotenv import load_dotenv
 from ..models import Project, Task, Employee
-from ..code_optimizer import CodeOptimizer
+from ..utils.code_optimizer import CodeOptimizer
 
 load_dotenv()
 

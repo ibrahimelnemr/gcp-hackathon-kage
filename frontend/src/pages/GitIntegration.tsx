@@ -4,7 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useNavigate } from 'react-router-dom';
 import HttpHook from '@/hooks/HttpHook';
 import { BACKEND_URL } from '@/data/Data';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { Trash2 } from 'lucide-react';
 
 export default function GitIntegration() {
   const { sendRequest } = HttpHook();
@@ -92,14 +92,16 @@ export default function GitIntegration() {
             <p className="text-sm text-muted-foreground mb-4">{project.description}</p>
             {project.repo_url ? (
               <div className="space-y-4">
-                <p className="text-sm text-green-500">Connected to: {project.repo_url}</p>
-                <Button
-                  variant="destructive"
-                  onClick={() => unlinkRepo(project.id)}
-                  disabled={loading}
-                >
-                  {loading ? 'Unlinking...' : 'Unlink Repository'}
-                </Button>
+                <div className="flex items-center justify-between bg-gray-800 text-white rounded-md p-3 border border-gray-700">
+                  <span className="font-mono text-sm truncate">{project.repo_url}</span>
+                  <button
+                    onClick={() => unlinkRepo(project.id)}
+                    disabled={loading}
+                    className="text-red-500 hover:text-red-700 transition-colors"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </button>
+                </div>
                 <div className="flex space-x-4">
                   <Button
                     variant="secondary"

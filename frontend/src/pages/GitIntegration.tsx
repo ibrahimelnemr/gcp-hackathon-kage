@@ -11,6 +11,7 @@ export default function GitIntegration() {
   const [token, setToken] = useState('');
   const [loading, setLoading] = useState(false);
   const [checkingToken, setCheckingToken] = useState(true); 
+  const [ghUsername, setGhUsername] = useState('');
 
   const checkToken = async () => {
     setCheckingToken(true);
@@ -20,6 +21,7 @@ export default function GitIntegration() {
       if (data.exists) {
         setTokenExists(true);
         setRepos(data.repos);
+        setGhUsername(data.username); 
       } else {
         setTokenExists(false);
       }
@@ -64,7 +66,12 @@ export default function GitIntegration() {
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Git Integration</h1>
       {tokenExists ? (
-        <RepoList repos={repos} />
+        <div className="p-6 border border-border rounded-md bg-card text-card-foreground">
+          <h2 className="text-xl font-bold mb-2">GitHub Connected Successfully</h2>
+          <p className="text-muted-foreground">
+            You are connected as <span className="font-medium text-primary">{ghUsername}</span>.
+          </p>
+        </div>
       ) : (
         <div className="space-y-4">
           <p className="text-muted-foreground">Please paste your GitHub Personal Access Token below:</p>

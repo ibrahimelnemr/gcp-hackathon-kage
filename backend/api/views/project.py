@@ -332,6 +332,29 @@ def link_project_to_repo(request, project_id):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
+@api_view(['POST'])
+def unlink_project_from_repo(request, project_id):
+    """
+    Unlink a GitHub repository from a project.
+    """
+    try:
+        # Fetch the project
+        project = Project.objects.get(id=project_id)
+
+        if not project.github_repo:
+            return JsonResponse({"error": "No repository linked to this project."}, status=400)
+
+        # Unlink the repository
+        project.github_repo = None
+        project.save()
+
+        return JsonResponse({"message": "Repository unlinked from the project successfully."}, status=200)
+
+    except Project.DoesNotExist:
+        return JsonResponse({"error": "Project not found."}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
 @api_view(['GET'])
 def get_projects_with_repos(request):
     """

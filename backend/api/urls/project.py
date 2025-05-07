@@ -18,4 +18,5 @@ urlpatterns = [
     path('tasks/<int:task_id>/update/', update_task, name='update_task'), 
     path('project/repos/', get_projects_with_repos, name='get_projects_with_repos'),
     path('project/<int:project_id>/link-repo/', link_project_to_repo, name='link_project_to_repo'),
+    path('project/<int:project_id>/unlink-repo/', unlink_project_from_repo, name='unlink_project_from_repo'),
 ]

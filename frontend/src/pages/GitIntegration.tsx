@@ -1,19 +1,18 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { RepositoryAnalysis } from '@/components/github/RepositoryAnalysis';
-import { AIAssist } from '@/components/github/AIAssist';
+import { useNavigate } from 'react-router-dom';
 import HttpHook from '@/hooks/HttpHook';
 import { BACKEND_URL } from '@/data/Data';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
 export default function GitIntegration() {
-  const { sendRequest, loading: httpLoading, httpError } = HttpHook();
+  const { sendRequest } = HttpHook();
   const [projects, setProjects] = useState([]);
   const [repos, setRepos] = useState([]);
   const [selectedRepo, setSelectedRepo] = useState<string | null>(null);
-  const [view, setView] = useState<'main' | 'analyze' | 'assist'>('main');
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const fetchProjects = async () => {
     try {
@@ -45,7 +44,7 @@ export default function GitIntegration() {
       const response = await sendRequest({
         method: 'post',
         url: `${BACKEND_URL}/project/${projectId}/link-repo/`,
-        body: { github_url: githubUrl }, // Send the GitHub URL
+        body: { github_url: githubUrl },
       });
 
       if (response) {
@@ -59,18 +58,29 @@ export default function GitIntegration() {
     }
   };
 
+  const unlinkRepo = async (projectId: number) => {
+    setLoading(true);
+    try {
+      const response = await sendRequest({
+        method: 'post',
+        url: `${BACKEND_URL}/project/${projectId}/unlink-repo/`,
+      });
+
+      if (response) {
+        alert('Repository unlinked successfully!');
+        fetchProjects(); // Refresh projects
+      }
+    } catch (error) {
+      console.error('Error unlinking repository:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchProjects();
     fetchRepos();
   }, []);
-
-  if (view === 'analyze') {
-    return <RepositoryAnalysis onBack={() => setView('main')} />;
-  }
-
-  if (view === 'assist') {
-    return <AIAssist onBack={() => setView('main')} />;
-  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -81,7 +91,30 @@ export default function GitIntegration() {
             <h3 className="text-lg font-bold">{project.name}</h3>
             <p className="text-sm text-muted-foreground mb-4">{project.description}</p>
             {project.repo_url ? (
-              <p className="text-sm text-green-500">Connected to: {project.repo_url}</p>
+              <div className="space-y-4">
+                <p className="text-sm text-green-500">Connected to: {project.repo_url}</p>
+                <Button
+                  variant="destructive"
+                  onClick={() => unlinkRepo(project.id)}
+                  disabled={loading}
+                >
+                  {loading ? 'Unlinking...' : 'Unlink Repository'}
+                </Button>
+                <div className="flex space-x-4">
+                  <Button
+                    variant="secondary"
+                    onClick={() => navigate(`/projects/${project.id}/analyze`)}
+                  >
+                    Analyze Repository
+                  </Button>
+                  <Button
+                    variant="default"
+                    onClick={() => navigate(`/projects/${project.id}/ai-assist`)}
+                  >
+                    AI Assist
+                  </Button>
+                </div>
+              </div>
             ) : (
               <div className="space-y-4">
                 <Select
@@ -101,22 +134,14 @@ export default function GitIntegration() {
                 </Select>
                 <Button
                   onClick={() => connectRepo(project.id, selectedRepo!)}
-                  disabled={!selectedRepo || loading || httpLoading}
+                  disabled={!selectedRepo || loading}
                 >
-                  {loading || httpLoading ? 'Connecting...' : 'Connect Repository'}
+                  {loading ? 'Connecting...' : 'Connect Repository'}
                 </Button>
               </div>
             )}
           </div>
         ))}
-      </div>
-      <div className="mt-8 flex space-x-4">
-        <Button variant="secondary" onClick={() => setView('analyze')}>
-          Analyze Repository
-        </Button>
-        <Button variant="default" onClick={() => setView('assist')}>
-          AI Assist
-        </Button>
       </div>
     </div>
   );

@@ -3,6 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { BACKEND_URL } from '@/data/Data';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import HttpHook from '@/hooks/HttpHook';
 
 export default function Settings() {
   const [tokenExists, setTokenExists] = useState(false);
@@ -10,12 +11,15 @@ export default function Settings() {
   const [token, setToken] = useState('');
   const [loading, setLoading] = useState(false);
   const [checkingToken, setCheckingToken] = useState(true);
+  const { sendRequest } = HttpHook();
 
   const checkToken = async () => {
     setCheckingToken(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/github/check-token/`);
-      const data = await response.json();
+      const data = await sendRequest({
+        method: 'get',
+        url: `${BACKEND_URL}/github/check-token/`,
+      });
       if (data.exists) {
         setTokenExists(true);
         setGhUsername(data.username); // Assume the backend returns the GitHub username

@@ -38,6 +38,23 @@ class AIAssist:
         self.output_dir = os.path.join(os.getcwd(), "output")
         os.makedirs(self.output_dir, exist_ok=True)
 
+        # Set limits
+        self.max_lines_per_file = 1000
+        self.total_data_cap = 100 * 1024  # 100 KB
+
+    def is_code_file(self, file_name: str) -> bool:
+        """
+        Determine if a file is a code file based on its extension or name.
+        """
+        non_code_files = ["package-lock.json", "yarn.lock", ".gitignore"]
+        code_extensions = [".py", ".js", ".ts", ".tsx", ".java", ".html", ".css", ".json"]
+
+        if file_name in non_code_files:
+            return False
+        if any(file_name.endswith(ext) for ext in code_extensions):
+            return True
+        return False
+
     def fetch_repository_files(self, repo_url: str) -> List[Dict[str, str]]:
         """
         Fetch all files in the repository along with their full paths and content.
@@ -50,16 +67,35 @@ class AIAssist:
 
             files = []
             contents = repo.get_contents("")
+            total_data_size = 0
+
             while contents:
                 file = contents.pop(0)
                 if file.type == "dir":
                     contents.extend(repo.get_contents(file.path))
                 else:
+                    if not self.is_code_file(file.path):
+                        print(f"Skipping non-code file: {file.path}")
+                        continue
+
                     try:
                         # Attempt to decode the file content as UTF-8
                         content = file.decoded_content.decode("utf-8")
                         num_lines = len(content.splitlines())
                         size = len(content.encode("utf-8"))
+
+                        # Limit lines per file
+                        if num_lines > self.max_lines_per_file:
+                            content = "\n".join(content.splitlines()[:self.max_lines_per_file])
+                            num_lines = self.max_lines_per_file
+                            size = len(content.encode("utf-8"))
+
+                        # Check total data cap
+                        if total_data_size + size > self.total_data_cap:
+                            print(f"Skipping file due to total data cap: {file.path}")
+                            continue
+
+                        total_data_size += size
                         print(f"Analyzed File: {file.path}, Lines: {num_lines}, Size: {size} bytes")
                         files.append({
                             "name": file.path,
@@ -72,6 +108,7 @@ class AIAssist:
                         continue
 
             print(f"Total files fetched: {len(files)}")
+            print(f"Total data size: {total_data_size} bytes")
             return files
         except Exception as e:
             raise ValueError(f"Error fetching repository files: {str(e)}")

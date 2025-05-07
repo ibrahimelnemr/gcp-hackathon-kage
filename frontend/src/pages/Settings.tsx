@@ -1,16 +1,15 @@
 import { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { RepoList } from '@/components/github/RepoList';
 import { BACKEND_URL } from '@/data/Data';
-import { LoadingSpinner } from '@/components/ui/loading-spinner'; // Import the LoadingSpinner component
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
 
-export default function GitIntegration() {
+export default function Settings() {
   const [tokenExists, setTokenExists] = useState(false);
-  const [repos, setRepos] = useState([]);
+  const [ghUsername, setGhUsername] = useState('');
   const [token, setToken] = useState('');
   const [loading, setLoading] = useState(false);
-  const [checkingToken, setCheckingToken] = useState(true); 
+  const [checkingToken, setCheckingToken] = useState(true);
 
   const checkToken = async () => {
     setCheckingToken(true);
@@ -19,14 +18,14 @@ export default function GitIntegration() {
       const data = await response.json();
       if (data.exists) {
         setTokenExists(true);
-        setRepos(data.repos);
+        setGhUsername(data.username); // Assume the backend returns the GitHub username
       } else {
         setTokenExists(false);
       }
     } catch (error) {
       console.error('Error checking GitHub token:', error);
     } finally {
-      setCheckingToken(false); // Stop checking
+      setCheckingToken(false);
     }
   };
 
@@ -54,7 +53,7 @@ export default function GitIntegration() {
   if (checkingToken) {
     return (
       <div className="container mx-auto flex flex-col items-center justify-center min-h-screen">
-        <LoadingSpinner size="lg" className="mb-4" /> {/* Add the loading spinner */}
+        <LoadingSpinner size="lg" className="mb-4" />
         <p className="text-muted-foreground">Checking for an existing GitHub Personal Access Token...</p>
       </div>
     );
@@ -62,9 +61,12 @@ export default function GitIntegration() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-6">Git Integration</h1>
+      <h1 className="text-3xl font-bold mb-6">Settings</h1>
       {tokenExists ? (
-        <RepoList repos={repos} />
+        <div className="p-6 border border-border rounded-md bg-card text-card-foreground">
+          <h2 className="text-xl font-bold mb-2">GitHub Connected Successfully</h2>
+          <p className="text-muted-foreground">You are connected as <span className="font-medium text-primary">{ghUsername}</span>.</p>
+        </div>
       ) : (
         <div className="space-y-4">
           <p className="text-muted-foreground">Please paste your GitHub Personal Access Token below:</p>

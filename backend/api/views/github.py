@@ -101,7 +101,7 @@ def repo_summary(request, repo_name):
 @csrf_exempt
 def check_github_token(request):
     """
-    Checks if a GitHub token exists and lists repositories if it does.
+    Checks if a GitHub token exists and returns the username if it does.
     """
     token = get_token()
     if not token:
@@ -109,9 +109,8 @@ def check_github_token(request):
 
     try:
         g = Github(token)
-        repos = g.get_user().get_repos()
-        data = [{"name": r.name, "url": r.html_url, "description": r.description} for r in repos]
-        return JsonResponse({"exists": True, "repos": data}, safe=False)
+        user = g.get_user()
+        return JsonResponse({"exists": True, "username": user.login}, status=200)
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 

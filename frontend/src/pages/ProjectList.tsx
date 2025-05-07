@@ -58,7 +58,7 @@ export default function ProjectList() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground mb-4">
-                    {project.description.split('\n')[0]}
+                    {project.description ? project.description.split('\n')[0] : ""}
                   </p>
                   <Button variant="default" onClick={() => handleProjectClick(project.id)}>
                     View Details

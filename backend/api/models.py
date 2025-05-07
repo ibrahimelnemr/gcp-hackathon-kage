@@ -4,9 +4,13 @@ from django.dispatch import receiver
 
 
 class Employee(models.Model):
+    
     name = models.CharField(max_length=255)
+    
     level = models.CharField(max_length=255)  # Added 'level' field
+    
     department = models.CharField(max_length=255)
+    
     email = models.EmailField(unique=True, null=True) 
 
     def __str__(self):
@@ -14,9 +18,14 @@ class Employee(models.Model):
 
 
 class Project(models.Model):
+    
     name = models.CharField(max_length=255)
+    
     description = models.TextField(blank=True, null=True)
-    github_repo = models.ForeignKey('GitHubRepository', on_delete=models.SET_NULL, null=True, blank=True, related_name="projects")
+    
+    github_repo = models.ForeignKey('GitHubRepository', on_delete=models.SET_NULL, null=True, blank=True,  related_name="projects")
+    
+    employees = models.ManyToManyField(Employee, related_name='projects', blank=True)
 
     def __str__(self):
         return self.name
@@ -30,8 +39,11 @@ class Task(models.Model):
     ]
 
     project = models.ForeignKey(Project, related_name='tasks', on_delete=models.CASCADE)
+    
     employee = models.ForeignKey(Employee, related_name='tasks', on_delete=models.CASCADE, null=True)
+    
     description = models.TextField()
+    
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='pending') 
 
     def __str__(self):
@@ -41,6 +53,7 @@ class Task(models.Model):
 class GitHubToken(models.Model):
     # user = models.ForeignKey('auth.User', on_delete=models.CASCADE, null=True)  
     encrypted_token = models.TextField()  
+    
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -48,8 +61,12 @@ class GitHubToken(models.Model):
 
 
 class GitHubRepository(models.Model):
-    token = models.ForeignKey(GitHubToken, on_delete=models.CASCADE, related_name="repositories", null=True)
+    
+    token = models.ForeignKey(GitHubToken, on_delete=models.CASCADE, 
+    related_name="repositories", null=True)
+    
     github_url = models.URLField()
+    
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

@@ -9,11 +9,11 @@ import ProjectManager from "./pages/ProjectManager";
 import CodeAssistant from "./pages/CodeAssistant";
 import AiChat from "./pages/AiChat";
 import NotFound from "./pages/NotFound";
-import Projects from "./pages/Projects";
 import ProjectTaskBoard from './pages/ProjectTaskBoard';
 import ProjectList from './pages/ProjectList';
 import Project from './pages/Project';
 import GitIntegration from "./pages/GitIntegration";
+import Settings from './pages/Settings';
 
 const queryClient = new QueryClient();
 
@@ -31,6 +31,7 @@ const App = () => (
             <Route path="/projects/:projectId" element={<Project />} />
             <Route path="/projects/:projectName" element={<ProjectTaskBoard />} />
             <Route path="/github" element={<GitIntegration />} />
+            <Route path="/settings" element={<Settings />} /> {/* New route */}
           </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>

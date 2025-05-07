@@ -86,15 +86,12 @@ export default function CodeOptimization() {
                       children={result.explanation}
                       remarkPlugins={[remarkGfm]}
                       components={{
-                        code({ inline, children, ...props }) {
-                          return inline ? (
+                        code({ children, ...props }) {
+                          // Render all code blocks as inline code
+                          return (
                             <code className="bg-gray-200 text-red-600 px-1 py-0.5 rounded" {...props}>
                               {children}
                             </code>
-                          ) : (
-                            <pre className="bg-gray-900 text-white p-4 rounded-md overflow-auto" {...props}>
-                              <code>{children}</code>
-                            </pre>
                           );
                         },
                       }}

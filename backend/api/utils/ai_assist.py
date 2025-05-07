@@ -3,10 +3,10 @@ import logging
 from datetime import datetime
 from github import Github
 from github.ContentFile import ContentFile
-from google.cloud import aiplatform
-from vertexai.generative_models import GenerativeModel
 from dotenv import load_dotenv
 from typing import List, Dict
+import vertexai
+from vertexai.generative_models import GenerativeModel
 
 load_dotenv()
 
@@ -14,12 +14,11 @@ class AIAssist:
     def __init__(self):
         # Initialize GCP AI client
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("AI_ASSIST_GOOGLE_APPLICATION_CREDENTIALS")
-        
         load_dotenv()
 
-        self.project_id = os.getenv("GCP_PROJECT_ID")
-        self.location = os.getenv("GCP_LOCATION", "us-central1")
-        self.model_name = os.getenv("GEMINI_MODEL_NAME", "gemini-1.5-flash-001")
+        self.project_id = os.getenv("AI_ASSIST_GCP_PROJECT_ID")
+        self.location = os.getenv("AI_ASSIST_GCP_LOCATION", "us-central1")
+        self.model_name = os.getenv("AI_ASSIST_VERTEX_MODEL_NAME", "gemini-1.5-flash-001")
         self.github_token = os.getenv("GITHUB_PERSONAL_ACCESS_TOKEN")
 
         if not self.github_token:
@@ -28,7 +27,8 @@ class AIAssist:
         if not self.project_id:
             raise ValueError("GCP Project ID not found in environment.")
 
-        aiplatform.init(project=self.project_id, location=self.location)
+        # Initialize Vertex AI client using the same method as Kage
+        vertexai.init(project=self.project_id, location=self.location)
         self.model = GenerativeModel(self.model_name)
 
         # Initialize GitHub client

@@ -38,13 +38,11 @@ export function EmployeePopup({ isOpen, onClose, projectId, employees, onEmploye
 
   const handleAddEmployee = async (employeeData: { name: string; level: string; department: string; email: string }) => {
     try {
-      const response = await fetch(`${BACKEND_URL}/project/${projectId}/employees/add/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(employeeData),
+      await sendRequest({
+        method: 'post',
+        url: `${BACKEND_URL}/project/${projectId}/employees/add/`,
+        body: employeeData,
       });
-
-      if (!response.ok) throw new Error('Failed to add employee');
 
       closeAddEmployeePopup();
       onEmployeeUpdated();

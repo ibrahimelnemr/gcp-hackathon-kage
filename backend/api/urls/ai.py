@@ -6,4 +6,5 @@ app_name = 'ai'
 urlpatterns = [
     path('ai/check', ai_chat, name='ai_chat'),
     path('ai/generate', generate_project_plan, name='ai_generate'),
+    path('ai/optimize', optimize_code, name='ai_optimize'), 
 ]

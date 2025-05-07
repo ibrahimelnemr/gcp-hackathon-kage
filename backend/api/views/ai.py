@@ -10,17 +10,18 @@ from ..kage import Kage
 import json
 from dotenv import load_dotenv
 from ..models import Project, Task, Employee
+from ..code_optimizer import CodeOptimizer
 
-load_dotenv() 
+load_dotenv()
 
-vertexai.init(project="centered-accord-442214-b9", location="us-central1")
-model = GenerativeModel("gemini-pro")
+# vertexai.init(project="centered-accord-442214-b9", location="us-central1")
+# model = GenerativeModel("gemini-pro")
 
-client = genai.Client(
-  vertexai=True, project="centered-accord-442214-b9", location="us-central1",
-)
+# client = genai.Client(
+#   vertexai=True, project="centered-accord-442214-b9", location="us-central1",
+# )
 
-model = GenerativeModel("gemini-pro")
+# model = GenerativeModel("gemini-pro")
 
 @api_view(['POST'])
 def generate_project_plan(request):
@@ -104,5 +105,30 @@ def ai_chat(request):
     except Exception as e:
         # return {"error": str(e)}
         # return Response({"error": str(e)}, status=500)
+        return JsonResponse({"error": str(e)}, status=500)
+
+@api_view(['POST'])
+def optimize_code(request):
+    """
+    Optimizes the provided code using the CodeOptimizer class.
+    """
+    try:
+        # Parse the input data from the request body
+        data = json.loads(request.body)
+        code = data.get("code")
+
+        if not code:
+            return JsonResponse({"error": "Code is required for optimization."}, status=400)
+
+        # Initialize the CodeOptimizer class
+        optimizer = CodeOptimizer()
+
+        # Optimize the code
+        result = optimizer.generate(code)
+
+        # Return the optimized code and explanation
+        return JsonResponse(result, status=200)
+
+    except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 

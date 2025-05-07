@@ -40,6 +40,7 @@ class Kage:
     def __init__(self):
         # Dynamically set the service account for Kage
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("KAGE_GOOGLE_APPLICATION_CREDENTIALS")
+        load_dotenv()
 
         self.GCP_PROJECT_ID = os.getenv("KAGE_GCP_PROJECT_ID")
         self.GCP_LOCATION = os.getenv("KAGE_GCP_LOCATION", "us-central1")

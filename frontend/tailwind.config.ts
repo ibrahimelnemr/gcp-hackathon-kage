@@ -66,7 +66,7 @@ export default {
           ring: "hsl(var(--sidebar-ring))",
         },
         kage: {
-          green: {
+          purple: {
             DEFAULT: "#86BC25",
             light: "#A3D45A",
             dark: "#5E8A1A",

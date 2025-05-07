@@ -27,7 +27,6 @@ export function TaskEditPopup({ isOpen, onClose, task, projectId, onTaskUpdated 
         url: `${BACKEND_URL}/project/${projectId}/employees/list/`,
       });
 
-      // Ensure the response is an array
       if (Array.isArray(data)) {
         setEmployees(data);
       } else {
@@ -42,13 +41,13 @@ export function TaskEditPopup({ isOpen, onClose, task, projectId, onTaskUpdated 
 
   const handleSave = async () => {
     try {
-      await fetch(`${BACKEND_URL}/tasks/${task.task_id}/update/`, {  // Correct URL
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      await sendRequest({
+        method: 'patch',
+        url: `${BACKEND_URL}/tasks/${task.task_id}/update/`,
+        body: {
           description,
           employee_id: selectedEmployee,
-        }),
+        },
       });
       onTaskUpdated();
       onClose();

@@ -1,85 +1,115 @@
 import { useState, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { RepoList } from '@/components/github/RepoList';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { BACKEND_URL } from '@/data/Data';
-import { LoadingSpinner } from '@/components/ui/loading-spinner'; // Import the LoadingSpinner component
+import { RepositoryAnalysis } from '@/components/github/RepositoryAnalysis';
+import { AIAssist } from '@/components/github/AIAssist';
 
 export default function GitIntegration() {
-  const [tokenExists, setTokenExists] = useState(false);
+  const [projects, setProjects] = useState([]);
   const [repos, setRepos] = useState([]);
-  const [token, setToken] = useState('');
+  const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
+  const [selectedRepo, setSelectedRepo] = useState<string | null>(null);
+  const [view, setView] = useState<'main' | 'analyze' | 'assist'>('main');
   const [loading, setLoading] = useState(false);
-  const [checkingToken, setCheckingToken] = useState(true); 
-  const [ghUsername, setGhUsername] = useState('');
 
-  const checkToken = async () => {
-    setCheckingToken(true);
+  const fetchProjects = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/github/check-token/`);
+      const response = await fetch(`${BACKEND_URL}/project/repos/`);
       const data = await response.json();
-      if (data.exists) {
-        setTokenExists(true);
-        setRepos(data.repos);
-        setGhUsername(data.username); 
-      } else {
-        setTokenExists(false);
-      }
+      setProjects(data);
     } catch (error) {
-      console.error('Error checking GitHub token:', error);
-    } finally {
-      setCheckingToken(false); // Stop checking
+      console.error('Error fetching projects:', error);
     }
   };
 
-  const saveToken = async () => {
+  const fetchRepos = async () => {
+    try {
+      const response = await fetch(`${BACKEND_URL}/github/repos/`);
+      const data = await response.json();
+      setRepos(data);
+    } catch (error) {
+      console.error('Error fetching repositories:', error);
+    }
+  };
+
+  const connectRepo = async (projectId: number, repoName: string) => {
     setLoading(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/github/token/`, {
+      const response = await fetch(`${BACKEND_URL}/project/${projectId}/link-repo/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token }),
+        body: JSON.stringify({ repo_name: repoName }),
       });
-      if (!response.ok) throw new Error('Failed to save token');
-      await checkToken(); // Recheck token after saving
+      if (!response.ok) throw new Error('Failed to connect repository');
+      alert('Repository connected successfully!');
+      fetchProjects(); // Refresh projects
     } catch (error) {
-      console.error('Error saving GitHub token:', error);
+      console.error('Error connecting repository:', error);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    checkToken();
+    fetchProjects();
+    fetchRepos();
   }, []);
 
-  if (checkingToken) {
-    return (
-      <div className="container mx-auto flex flex-col items-center justify-center min-h-screen">
-        <LoadingSpinner size="lg" className="mb-4" /> {/* Add the loading spinner */}
-        <p className="text-muted-foreground">Checking for an existing GitHub Personal Access Token...</p>
-      </div>
-    );
+  if (view === 'analyze') {
+    return <RepositoryAnalysis onBack={() => setView('main')} />;
+  }
+
+  if (view === 'assist') {
+    return <AIAssist onBack={() => setView('main')} />;
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6">Git Integration</h1>
-      {tokenExists ? (
-        <div className="p-6 border border-border rounded-md bg-card text-card-foreground">
-          <h2 className="text-xl font-bold mb-2">GitHub Connected Successfully</h2>
-          <p className="text-muted-foreground">
-            You are connected as <span className="font-medium text-primary">{ghUsername}</span>.
-          </p>
-        </div>
-      ) : (
-        <div className="p-6 border border-border rounded-md bg-card text-card-foreground">
-          <h2 className="text-xl font-bold mb-2">No GitHub Access Token Found</h2>
-          <p className="text-muted-foreground">
-            Please set a GitHub Personal Access Token in the <span className="font-medium text-primary">Settings</span> page.
-          </p>
-        </div>
-      )}
+      <div className="space-y-8">
+        {projects.map((project) => (
+          <div key={project.id} className="p-4 border border-border rounded-md bg-card text-card-foreground">
+            <h3 className="text-lg font-bold">{project.name}</h3>
+            <p className="text-sm text-muted-foreground mb-4">{project.description}</p>
+            {project.repo_url ? (
+              <p className="text-sm text-green-500">Connected to: {project.repo_url}</p>
+            ) : (
+              <div className="space-y-4">
+                <Select
+                  value={selectedRepo || ''}
+                  onValueChange={(value) => setSelectedRepo(value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a repository" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {repos.map((repo) => (
+                      <SelectItem key={repo.name} value={repo.name}>
+                        {repo.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Button
+                  onClick={() => connectRepo(project.id, selectedRepo!)}
+                  disabled={!selectedRepo || loading}
+                >
+                  {loading ? 'Connecting...' : 'Connect Repository'}
+                </Button>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="mt-8 flex space-x-4">
+        <Button variant="secondary" onClick={() => setView('analyze')}>
+          Analyze Repository
+        </Button>
+        <Button variant="default" onClick={() => setView('assist')}>
+          AI Assist
+        </Button>
+      </div>
     </div>
   );
 }

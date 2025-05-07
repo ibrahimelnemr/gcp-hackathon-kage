@@ -3,15 +3,18 @@ import { useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import HttpHook from '@/hooks/HttpHook';
 import { BACKEND_URL } from '@/data/Data';
+import { useLoading } from '@/hooks/useLoading';
 
 export function AIAssist() {
   const { projectId } = useParams();
   const { sendRequest } = HttpHook();
+  const { loading, setLoading, LoadingIndicator } = useLoading();
   const [project, setProject] = useState(null);
   const [repo, setRepo] = useState(null);
 
   useEffect(() => {
     const fetchProjectDetails = async () => {
+      setLoading(true);
       try {
         const data = await sendRequest({
           method: 'get',
@@ -21,11 +24,17 @@ export function AIAssist() {
         setRepo(data.github_repo);
       } catch (error) {
         console.error('Error fetching project details:', error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchProjectDetails();
   }, [projectId]);
+
+  if (loading) {
+    return <LoadingIndicator />;
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">

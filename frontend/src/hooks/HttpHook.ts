@@ -43,7 +43,12 @@ export default function HttpHook() {
           throw new Error(`Unsupported method: ${method}`);
       }
 
+      console.log(`HttpHook - response`);
+      console.log(response);
+      console.log(response.data);
+
       return response.data;
+
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "An unknown error occurred";

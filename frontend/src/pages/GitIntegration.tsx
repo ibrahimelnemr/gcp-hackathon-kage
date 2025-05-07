@@ -73,17 +73,11 @@ export default function GitIntegration() {
           </p>
         </div>
       ) : (
-        <div className="space-y-4">
-          <p className="text-muted-foreground">Please paste your GitHub Personal Access Token below:</p>
-          <Input
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-            placeholder="Enter your GitHub token"
-            className="w-full"
-          />
-          <Button onClick={saveToken} disabled={loading || !token.trim()} className="w-full">
-            {loading ? 'Saving...' : 'Submit'}
-          </Button>
+        <div className="p-6 border border-border rounded-md bg-card text-card-foreground">
+          <h2 className="text-xl font-bold mb-2">No GitHub Access Token Found</h2>
+          <p className="text-muted-foreground">
+            Please set a GitHub Personal Access Token in the <span className="font-medium text-primary">Settings</span> page.
+          </p>
         </div>
       )}
     </div>

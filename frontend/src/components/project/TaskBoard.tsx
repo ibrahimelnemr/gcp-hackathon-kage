@@ -58,10 +58,10 @@ export function TaskBoard({ tasks: initialTasks, projectId }: TaskBoardProps) {
 
     try {
       setLoadingTaskId(taskId); // Set the loading state for the task
-      await fetch(`${BACKEND_URL}/tasks/${taskId}/update/`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
+      await sendRequest({
+        method: 'patch',
+        url: `${BACKEND_URL}/tasks/${taskId}/update/`,
+        body: { status: newStatus },
       });
       fetchTasks(); // Refresh tasks after updating
     } catch (error) {

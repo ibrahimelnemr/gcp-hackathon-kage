@@ -36,12 +36,11 @@ export default function Settings() {
   const saveToken = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/github/token/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token }),
+      await sendRequest({
+        method: 'post',
+        url: `${BACKEND_URL}/github/token/`,
+        body: { token },
       });
-      if (!response.ok) throw new Error('Failed to save token');
       await checkToken(); // Recheck token after saving
     } catch (error) {
       console.error('Error saving GitHub token:', error);

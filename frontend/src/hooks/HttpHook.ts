@@ -6,7 +6,7 @@ export default function HttpHook() {
   const [loading, setLoading] = useState<boolean>(false);
   const [httpError, setHttpError] = useState<string | null>(null);
 
-  type Method = "post" | "get" | "put" | "delete";
+  type Method = "post" | "get" | "put" | "delete" | "patch";
 
   const sendRequest = async ({
     method,
@@ -32,6 +32,9 @@ export default function HttpHook() {
           break;
         case "put":
           response = await axios.put(url, body);
+          break;
+        case "patch":
+          response = await axios.patch(url, body);
           break;
         case "delete":
           response = await axios.delete(url);

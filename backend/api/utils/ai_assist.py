@@ -1,5 +1,6 @@
 import os
 import logging
+from datetime import datetime
 from github import Github
 from github.ContentFile import ContentFile
 from google.cloud import aiplatform
@@ -33,10 +34,15 @@ class AIAssist:
         # Initialize GitHub client
         self.github_client = Github(self.github_token)
 
+        # Ensure output directory exists
+        self.output_dir = os.path.join(os.getcwd(), "output")
+        os.makedirs(self.output_dir, exist_ok=True)
+
     def fetch_repository_files(self, repo_url: str) -> List[Dict[str, str]]:
         """
         Fetch all files in the repository along with their full paths and content.
         """
+        print(f"Fetching files from repository: {repo_url}")
         try:
             repo_name = repo_url.split("/")[-1]
             user = self.github_client.get_user()
@@ -52,6 +58,9 @@ class AIAssist:
                     try:
                         # Attempt to decode the file content as UTF-8
                         content = file.decoded_content.decode("utf-8")
+                        num_lines = len(content.splitlines())
+                        size = len(content.encode("utf-8"))
+                        print(f"Analyzed File: {file.path}, Lines: {num_lines}, Size: {size} bytes")
                         files.append({
                             "name": file.path,
                             "content": content
@@ -59,16 +68,48 @@ class AIAssist:
                     except UnicodeDecodeError:
                         # Skip binary files or handle them differently
                         logging.warning(f"Skipping binary file: {file.path}")
+                        print(f"Skipped Binary File: {file.path}")
                         continue
 
+            print(f"Total files fetched: {len(files)}")
             return files
         except Exception as e:
             raise ValueError(f"Error fetching repository files: {str(e)}")
+
+    def write_output_to_file(self, repo_name: str, files: List[Dict[str, str]]):
+        """
+        Write the extracted data to a timestamped text file.
+        """
+        print(f"Writing output to file for repository: {repo_name}")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_file = os.path.join(self.output_dir, f"ai_assist_{timestamp}.txt")
+
+        with open(output_file, "w", encoding="utf-8") as f:
+            f.write(f"Repository: {repo_name}\n")
+            f.write(f"Timestamp: {timestamp}\n")
+            f.write("=" * 80 + "\n\n")
+
+            total_files = len(files)
+            f.write(f"Total Files Analyzed: {total_files}\n\n")
+
+            for file in files:
+                num_lines = len(file["content"].splitlines())
+                size = len(file["content"].encode("utf-8"))
+                f.write(f"File: {file['name']}\n")
+                f.write(f"Number of Lines: {num_lines}\n")
+                f.write(f"Size: {size} bytes\n")
+                f.write("-" * 40 + "\n")
+                f.write(file["content"] + "\n")
+                f.write("=" * 80 + "\n\n")
+
+        print(f"Output written to: {output_file}")
+        logging.info(f"Output written to {output_file}")
 
     def create_prompt(self, repo_name: str, files: List[Dict[str, str]]) -> str:
         """
         Create a prompt for the Gemini AI model to analyze the repository.
         """
+        print(f"Creating prompt for repository: {repo_name}")
         file_list = "\n".join([f"- {file['name']}" for file in files])
         prompt = f"""
         You are an expert software engineer and repository analyzer. Your task is to analyze the repository "{repo_name}" and provide insights.
@@ -130,15 +171,20 @@ class AIAssist:
         """
         Analyze the repository and return tasks and refactors.
         """
+        print(f"Starting analysis for repository: {repo_url}")
         try:
             # Fetch repository files
             repo_name = repo_url.split("/")[-1]
             files = self.fetch_repository_files(repo_url)
 
+            # Write extracted data to output file
+            self.write_output_to_file(repo_name, files)
+
             # Create prompt
             prompt = self.create_prompt(repo_name, files)
 
             # Generate response from Gemini AI
+            print("Generating AI response...")
             generation_config = {
                 "temperature": 0.2,
                 "max_output_tokens": 4096,
@@ -147,6 +193,7 @@ class AIAssist:
 
             # Parse response
             if hasattr(response, "text"):
+                print("AI response generated successfully.")
                 return response.text
             else:
                 raise ValueError("Failed to generate response from Gemini AI.")

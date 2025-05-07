@@ -8,11 +8,12 @@ import { BACKEND_URL } from '@/data/Data';
 import { Code, RefreshCw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { SAMPLE_CODE } from '@/data/Data';
 
 export default function CodeOptimization() {
   const { sendRequest } = HttpHook();
   const { loading, setLoading, LoadingIndicator } = useLoading();
-  const [code, setCode] = useState('');
+  const [code, setCode] = useState(SAMPLE_CODE);
   const [result, setResult] = useState<{ code: string; explanation: string } | null>(null);
   const [error, setError] = useState('');
 
@@ -53,6 +54,11 @@ export default function CodeOptimization() {
     return match ? match[1].trim() : codeBlock;
   };
 
+  const preprocessExplanation = (explanation: string) => {
+    // Add a space after each newline to separate paragraphs
+    return explanation.replace(/\n/g, '\n\n');
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6 flex items-center">
@@ -83,13 +89,13 @@ export default function CodeOptimization() {
                   <h3 className="text-lg font-bold">Explanation</h3>
                   <div className="prose max-w-none">
                     <ReactMarkdown
-                      children={result.explanation}
+                      children={preprocessExplanation(result.explanation)}
                       remarkPlugins={[remarkGfm]}
                       components={{
                         code({ children, ...props }) {
-                          // Render all code blocks as inline code
+                          // Render inline code as plain text
                           return (
-                            <code className="bg-gray-200 text-red-600 px-1 py-0.5 rounded" {...props}>
+                            <code className="font-mono" {...props}>
                               {children}
                             </code>
                           );

@@ -12,7 +12,10 @@ load_dotenv()
 class AIAssist:
     def __init__(self):
         # Initialize GCP AI client
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("AI_ASSIST_GOOGLE_APPLICATION_CREDENTIALS")
+        
+        load_dotenv()
+
         self.project_id = os.getenv("GCP_PROJECT_ID")
         self.location = os.getenv("GCP_LOCATION", "us-central1")
         self.model_name = os.getenv("GEMINI_MODEL_NAME", "gemini-1.5-flash-001")

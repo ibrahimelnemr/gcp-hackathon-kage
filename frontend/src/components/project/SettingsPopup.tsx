@@ -2,6 +2,7 @@ import { Popup } from '@/components/ui/Popup';
 import { Button } from '@/components/ui/button';
 import { useConfirmationPopup } from '@/hooks/useConfirmationPopup';
 import { BACKEND_URL } from '@/data/Data';
+import HttpHook from '@/hooks/HttpHook';
 
 interface SettingsPopupProps {
   isOpen: boolean;
@@ -11,14 +12,14 @@ interface SettingsPopupProps {
 
 export function SettingsPopup({ isOpen, onClose, projectId }: SettingsPopupProps) {
   const { isOpen: isConfirmOpen, openPopup: openConfirmPopup, closePopup: closeConfirmPopup } = useConfirmationPopup();
+  const { sendRequest } = HttpHook();
 
   const handleDelete = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/project/${projectId}/delete/`, {
-        method: 'DELETE',
+      await sendRequest({
+        method: 'delete',
+        url: `${BACKEND_URL}/project/${projectId}/delete/`,
       });
-
-      if (!response.ok) throw new Error('Failed to delete project');
 
       closeConfirmPopup();
       onClose();

@@ -49,10 +49,17 @@ class AIAssist:
                 if file.type == "dir":
                     contents.extend(repo.get_contents(file.path))
                 else:
-                    files.append({
-                        "name": file.path,
-                        "content": file.decoded_content.decode("utf-8")
-                    })
+                    try:
+                        # Attempt to decode the file content as UTF-8
+                        content = file.decoded_content.decode("utf-8")
+                        files.append({
+                            "name": file.path,
+                            "content": content
+                        })
+                    except UnicodeDecodeError:
+                        # Skip binary files or handle them differently
+                        logging.warning(f"Skipping binary file: {file.path}")
+                        continue
 
             return files
         except Exception as e:
@@ -208,6 +215,6 @@ class AIAssist:
 
 if __name__ == "__main__":
     analyzer = AIAssist()
-    repo_url = "https://github.com/username/repository-name"
+    repo_url = "https://github.com/ibrahimelnemr/mern-exercise-tracker-mongodb"
     result = analyzer.analyze_repository(repo_url)
     print(result)

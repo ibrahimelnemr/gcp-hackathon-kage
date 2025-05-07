@@ -7,6 +7,7 @@ import { ITask } from '@/data/Interfaces';
 import { usePopupHandler } from '@/hooks/usePopupHandler';
 import { TaskEditPopup } from './TaskEditPopup';
 import { BACKEND_URL } from '@/data/Data';
+import HttpHook from '@/hooks/HttpHook';
 
 interface TaskBoardProps {
   tasks: ITask[];
@@ -18,12 +19,14 @@ export function TaskBoard({ tasks: initialTasks, projectId }: TaskBoardProps) {
   const [loadingTaskId, setLoadingTaskId] = useState<number | null>(null); // Track the loading state for a specific task
   const { isOpen: isEditTaskOpen, openPopup: openEditTaskPopup, closePopup: closeEditTaskPopup } = usePopupHandler();
   const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
+  const { sendRequest } = HttpHook();
 
   const fetchTasks = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/project/${projectId}/tasks/`);
-      if (!response.ok) throw new Error('Failed to fetch tasks');
-      const data = await response.json();
+      const data = await sendRequest({
+        method: 'get',
+        url: `${BACKEND_URL}/project/${projectId}/tasks/`,
+      });
 
       // Ensure tasks have an `id` field
       const mappedTasks = data.map((task: any) => ({

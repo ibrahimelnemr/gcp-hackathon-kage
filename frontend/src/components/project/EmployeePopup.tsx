@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { Trash2, Plus } from 'lucide-react';
 import { BACKEND_URL } from '@/data/Data';
 import { usePopupHandler } from '@/hooks/usePopupHandler';
+import HttpHook from '@/hooks/HttpHook';
 
 interface EmployeePopupProps {
   isOpen: boolean;
@@ -19,14 +20,14 @@ export function EmployeePopup({ isOpen, onClose, projectId, employees, onEmploye
   const { isOpen: isConfirmOpen, openPopup: openConfirmPopup, closePopup: closeConfirmPopup } = useConfirmationPopup();
   const { isOpen: isAddEmployeeOpen, openPopup: openAddEmployeePopup, closePopup: closeAddEmployeePopup } = usePopupHandler();
   const [selectedEmployee, setSelectedEmployee] = useState<number | null>(null);
+  const { sendRequest } = HttpHook();
 
   const handleRemoveEmployee = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/project/${projectId}/employees/${selectedEmployee}/remove/`, {
-        method: 'DELETE',
+      await sendRequest({
+        method: 'delete',
+        url: `${BACKEND_URL}/project/${projectId}/employees/${selectedEmployee}/remove/`,
       });
-
-      if (!response.ok) throw new Error('Failed to remove employee');
 
       closeConfirmPopup();
       onEmployeeUpdated();

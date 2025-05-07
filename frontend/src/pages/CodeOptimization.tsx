@@ -54,11 +54,6 @@ export default function CodeOptimization() {
     return match ? match[1].trim() : codeBlock;
   };
 
-  const preprocessExplanation = (explanation: string) => {
-    // Add a space after each newline to separate paragraphs
-    return explanation.replace(/\n/g, '\n\n');
-  };
-
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold mb-6 flex items-center">
@@ -75,23 +70,32 @@ export default function CodeOptimization() {
           <Card>
             <CardHeader>
               <CardTitle>Optimization Results</CardTitle>
+              <p className="mb-4"></p>
               <CardDescription>Here are the recommendations for your code:</CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-8">
                 <div>
                   <h3 className="text-lg font-bold">Optimized Code</h3>
-                  <pre className="p-4 bg-gray-900 text-white rounded-md text-sm overflow-auto">
+                  <p className="mb-4"></p>
+                  <pre className="p-4  border border-gray-600 text-white rounded-md text-sm overflow-auto">
                     {extractCode(result.code)}
                   </pre>
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold">Explanation</h3>
+                  <h3 className="text-lg font-bold mb-4">Explanation</h3> {/* Added margin-bottom */}
                   <div className="prose max-w-none">
                     <ReactMarkdown
-                      children={preprocessExplanation(result.explanation)}
+                      children={result.explanation}
                       remarkPlugins={[remarkGfm]}
                       components={{
+                        p({ children, ...props }) {
+                          return (
+                            <p className="mb-4" {...props}>
+                              {children}
+                            </p>
+                          );
+                        },
                         code({ children, ...props }) {
                           // Render inline code as plain text
                           return (

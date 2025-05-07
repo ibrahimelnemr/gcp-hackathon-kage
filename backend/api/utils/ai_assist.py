@@ -149,6 +149,26 @@ class AIAssist:
         print(f"Output written to: {output_file}")
         logging.info(f"Output written to {output_file}")
 
+    def write_model_response_to_file(self, repo_name: str, response: str, task_description: str = None):
+        """
+        Write the AI model's response to a timestamped text file.
+        """
+        print(f"Writing model response to file for repository: {repo_name}")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_file = os.path.join(self.output_dir, f"ai_assist_response_{timestamp}.txt")
+
+        with open(output_file, "w", encoding="utf-8") as f:
+            f.write(f"Repository: {repo_name}\n")
+            f.write(f"Timestamp: {timestamp}\n")
+            if task_description:
+                f.write(f"Task Description: {task_description}\n")
+            f.write("=" * 80 + "\n\n")
+            f.write("AI Model Response:\n")
+            f.write(response)
+
+        print(f"Model response written to: {output_file}")
+        logging.info(f"Model response written to {output_file}")
+
     def create_prompt(self, repo_name: str, files: List[Dict[str, str]]) -> str:
         """
         Create a prompt for the Gemini AI model to analyze the repository.
@@ -238,6 +258,7 @@ class AIAssist:
             # Parse response
             if hasattr(response, "text"):
                 print("AI response generated successfully.")
+                self.write_model_response_to_file(repo_name, response.text)
                 return response.text
             else:
                 raise ValueError("Failed to generate response from Gemini AI.")
@@ -265,6 +286,7 @@ class AIAssist:
 
             # Parse response
             if hasattr(response, "text"):
+                self.write_model_response_to_file(repo_name, response.text, task_description)
                 return response.text
             else:
                 raise ValueError("Failed to generate Git diff from Gemini AI.")

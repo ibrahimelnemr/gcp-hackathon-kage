@@ -9,6 +9,7 @@ import { IProject } from '@/data/Interfaces';
 import { Edit, Settings, User } from 'lucide-react'; // Import the edit, settings, and user icons
 import { SettingsPopup } from '@/components/project/SettingsPopup';
 import { EmployeePopup } from '@/components/project/EmployeePopup';
+import HttpHook from '@/hooks/HttpHook';
 
 export default function Project() {
   const { projectId } = useParams<{ projectId: string }>();
@@ -18,17 +19,15 @@ export default function Project() {
   const { isOpen: isEditOpen, openPopup: openEditPopup, closePopup: closeEditPopup } = usePopupHandler();
   const { isOpen: isSettingsOpen, openPopup: openSettingsPopup, closePopup: closeSettingsPopup } = usePopupHandler();
   const { isOpen: isEmployeePopupOpen, openPopup: openEmployeePopup, closePopup: closeEmployeePopup } = usePopupHandler();
+  const { sendRequest } = HttpHook();
 
   const fetchProject = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${BACKEND_URL}/project/${projectId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch project');
-      }
-      const data = await response.json();
-      console.log(`Project.tsx - fetchProject`);
-      console.log(data);
+      const data = await sendRequest({
+        method: 'get',
+        url: `${BACKEND_URL}/project/${projectId}`,
+      });
       setProject(data);
     } catch (error) {
       console.error('Error fetching project:', error);

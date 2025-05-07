@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { BACKEND_URL } from '@/data/Data';
 import { ITask } from '@/data/Interfaces';
 import { useEffect, useState } from 'react';
+import HttpHook from '@/hooks/HttpHook';
 
 interface TaskEditPopupProps {
   isOpen: boolean;
@@ -17,12 +18,14 @@ export function TaskEditPopup({ isOpen, onClose, task, projectId, onTaskUpdated 
   const [description, setDescription] = useState(task.description);
   const [selectedEmployee, setSelectedEmployee] = useState<number | null>(task.employee_id || null);
   const [employees, setEmployees] = useState<{ id: number; name: string }[]>([]);
+  const { sendRequest } = HttpHook();
 
   const fetchEmployees = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/project/${projectId}/employees/list/`);
-      if (!response.ok) throw new Error('Failed to fetch employees');
-      const data = await response.json();
+      const data = await sendRequest({
+        method: 'get',
+        url: `${BACKEND_URL}/project/${projectId}/employees/list/`,
+      });
 
       // Ensure the response is an array
       if (Array.isArray(data)) {

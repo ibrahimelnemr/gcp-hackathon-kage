@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { BACKEND_URL } from '@/data/Data';
 import { IProject } from '@/data/Interfaces';
 import { useConfirmationPopup } from '@/hooks/useConfirmationPopup';
+import HttpHook from '@/hooks/HttpHook';
 
 interface EditProjectPopupProps {
   isOpen: boolean;
@@ -16,16 +17,15 @@ interface EditProjectPopupProps {
 export function EditProjectPopup({ isOpen, onClose, project, onProjectUpdated }: EditProjectPopupProps) {
   const [name, setName] = useState(project.name);
   const [description, setDescription] = useState(project.description);
-
+  const { sendRequest } = HttpHook();
+ 
   const handleSave = async () => {
     try {
-      const response = await fetch(`${BACKEND_URL}/rest/projects/${project.id}/`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, description }),
+      await sendRequest({
+        method: 'patch',
+        url: `${BACKEND_URL}/rest/projects/${project.id}/`,
+        body: { name, description },
       });
-
-      if (!response.ok) throw new Error('Failed to update project');
 
       onProjectUpdated();
       onClose();

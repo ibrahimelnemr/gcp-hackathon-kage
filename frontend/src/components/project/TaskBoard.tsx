@@ -16,7 +16,7 @@ interface TaskBoardProps {
 
 export function TaskBoard({ tasks: initialTasks, projectId }: TaskBoardProps) {
   const [tasks, setTasks] = useState<ITask[]>(initialTasks);
-  const [loadingTaskId, setLoadingTaskId] = useState<number | null>(null); // Track the loading state for a specific task
+  const [loadingTaskId, setLoadingTaskId] = useState<number | null>(null);
   const { isOpen: isEditTaskOpen, openPopup: openEditTaskPopup, closePopup: closeEditTaskPopup } = usePopupHandler();
   const [selectedTask, setSelectedTask] = useState<ITask | null>(null);
   const { sendRequest } = HttpHook();
@@ -28,9 +28,8 @@ export function TaskBoard({ tasks: initialTasks, projectId }: TaskBoardProps) {
         url: `${BACKEND_URL}/project/${projectId}/tasks/`,
       });
 
-      // Ensure tasks have an `id` field
       const mappedTasks = data.map((task: any) => ({
-        task_id: task.task_id, // Ensure task_id is mapped correctly
+        task_id: task.task_id,
         description: task.description,
         status: task.status,
         employee_name: task.employee_name,
@@ -57,17 +56,30 @@ export function TaskBoard({ tasks: initialTasks, projectId }: TaskBoardProps) {
     }
 
     try {
-      setLoadingTaskId(taskId); // Set the loading state for the task
+      setLoadingTaskId(taskId);
       await sendRequest({
         method: 'patch',
         url: `${BACKEND_URL}/tasks/${taskId}/update/`,
         body: { status: newStatus },
       });
-      fetchTasks(); // Refresh tasks after updating
+      fetchTasks();
     } catch (error) {
       console.error('Error updating task status:', error);
     } finally {
-      setLoadingTaskId(null); // Clear the loading state
+      setLoadingTaskId(null);
+    }
+  };
+
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'to-do':
+        return 'To Do';
+      case 'in-progress':
+        return 'In Progress';
+      case 'done':
+        return 'Done';
+      default:
+        return 'Unknown';
     }
   };
 
@@ -87,7 +99,7 @@ export function TaskBoard({ tasks: initialTasks, projectId }: TaskBoardProps) {
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
                     <Badge variant="outline" className="bg-yellow-500/10 text-yellow-500 border-yellow-500">
-                      Task #{task.task_id}
+                      {getStatusLabel(task.status)}
                     </Badge>
                     <div className="flex space-x-1">
                       <Button
@@ -95,7 +107,7 @@ export function TaskBoard({ tasks: initialTasks, projectId }: TaskBoardProps) {
                         size="icon"
                         onClick={() => moveTask(task.task_id, 'forward')}
                         className="h-8 w-8"
-                        disabled={loadingTaskId === task.task_id} // Disable button while loading
+                        disabled={loadingTaskId === task.task_id}
                       >
                         {loadingTaskId === task.task_id ? (
                           <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-yellow-500"></div>
@@ -138,7 +150,7 @@ export function TaskBoard({ tasks: initialTasks, projectId }: TaskBoardProps) {
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
                     <Badge variant="outline" className="bg-blue-500/10 text-blue-500 border-blue-500">
-                      Task #{task.task_id}
+                      {getStatusLabel(task.status)}
                     </Badge>
                     <div className="flex space-x-1">
                       <Button
@@ -146,7 +158,7 @@ export function TaskBoard({ tasks: initialTasks, projectId }: TaskBoardProps) {
                         size="icon"
                         onClick={() => moveTask(task.task_id, 'backward')}
                         className="h-8 w-8"
-                        disabled={loadingTaskId === task.task_id} // Disable button while loading
+                        disabled={loadingTaskId === task.task_id}
                       >
                         {loadingTaskId === task.task_id ? (
                           <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-blue-500"></div>
@@ -159,7 +171,7 @@ export function TaskBoard({ tasks: initialTasks, projectId }: TaskBoardProps) {
                         size="icon"
                         onClick={() => moveTask(task.task_id, 'forward')}
                         className="h-8 w-8"
-                        disabled={loadingTaskId === task.task_id} // Disable button while loading
+                        disabled={loadingTaskId === task.task_id}
                       >
                         {loadingTaskId === task.task_id ? (
                           <div className="animate-spin rounded-full h-4 w-4 border-t-2 border-b-2 border-blue-500"></div>
@@ -202,7 +214,7 @@ export function TaskBoard({ tasks: initialTasks, projectId }: TaskBoardProps) {
                 <CardHeader className="pb-2">
                   <div className="flex justify-between items-start">
                     <Badge variant="outline" className="bg-green-500/10 text-green-500 border-green-500">
-                      Task #{task.task_id}
+                      {getStatusLabel(task.status)}
                     </Badge>
                     <div className="flex space-x-1">
                       <Button

@@ -389,13 +389,18 @@ class AIAssist:
             if not os.path.exists(patch_file_path):
                 raise FileNotFoundError(f"Patch file not found at: {patch_file_path}")
 
-            # Apply the patch using `git am`
-            print("Applying Git diff using `git am`...")
+            # Debug: Log the patch content
+            print("Patch file content:")
+            with open(patch_file_path, "r") as patch_file:
+                print(patch_file.read())
+
+            # Apply the patch using `git apply`
+            print("Applying Git diff using `git apply`...")
             try:
-                repo.git.am(patch_file_path)
-                print("Git diff applied successfully using `git am`.")
+                repo.git.apply(patch_file_path)
+                print("Git diff applied successfully using `git apply`.")
             except Exception as e:
-                raise ValueError(f"Error applying Git diff using `git am`: {str(e)}")
+                raise ValueError(f"Error applying Git diff using `git apply`: {str(e)}")
 
             # Commit the changes
             print("Committing changes...")

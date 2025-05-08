@@ -11,6 +11,7 @@ import json
 from dotenv import load_dotenv
 from ..models import Project, Task, Employee
 from ..utils.code_optimizer import CodeOptimizer
+from ..utils.ai_assist import AIAssist
 
 load_dotenv()
 
@@ -128,6 +129,54 @@ def optimize_code(request):
 
         # Return the optimized code and explanation
         return JsonResponse(result, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+@api_view(['POST'])
+def repository_analysis(request):
+    """
+    Analyze the repository linked to a project and return a summary.
+    """
+    try:
+        # Parse the input data from the request body
+        data = json.loads(request.body)
+        repo_url = data.get("repo_url")
+
+        if not repo_url:
+            return JsonResponse({"error": "Repository URL is required."}, status=400)
+
+        # Initialize AI Assist and analyze the repository
+        ai_assist = AIAssist()
+        analysis_result = ai_assist.analyze_repository(repo_url)
+
+        # Return the analysis result
+        return JsonResponse({"analysis_result": analysis_result}, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+@api_view(['POST'])
+def ai_assist_functionality(request):
+    """
+    Generate a Git diff for a specific task description and return it.
+    """
+    try:
+        # Parse the input data from the request body
+        data = json.loads(request.body)
+        repo_url = data.get("repo_url")
+        task_description = data.get("task_description")
+
+        if not repo_url or not task_description:
+            return JsonResponse({"error": "Both 'repo_url' and 'task_description' are required."}, status=400)
+
+        # Initialize AI Assist and generate the Git diff
+        ai_assist = AIAssist()
+        git_diff = ai_assist.generate_git_diff(repo_url, task_description)
+
+        # Return the Git diff
+        return JsonResponse({"git_diff": git_diff}, status=200)
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)

@@ -7,18 +7,27 @@ from dotenv import load_dotenv
 from typing import List, Dict
 import vertexai
 from vertexai.generative_models import GenerativeModel
+from google import genai
+from google.genai import types
 
 load_dotenv()
 
 class AIAssist:
     def __init__(self):
         # Initialize GCP AI client
-        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("AI_ASSIST_GOOGLE_APPLICATION_CREDENTIALS")
+        
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("CODE_OPTIMIZER_GOOGLE_APPLICATION_CREDENTIALS")
+        
         load_dotenv()
 
+        # self.project_id = os.getenv("CODE_OPTIMIZER_GCP_PROJECT_ID")
+        
         self.project_id = os.getenv("AI_ASSIST_GCP_PROJECT_ID")
+        
         self.location = os.getenv("AI_ASSIST_GCP_LOCATION", "us-central1")
-        self.model_name = os.getenv("AI_ASSIST_VERTEX_MODEL_NAME", "gemini-1.5-flash-001")
+        
+        self.model_name = os.getenv("AI_ASSIST_VERTEX_MODEL_NAME", "gemini-1.5-flash-002")
+        
         self.github_token = os.getenv("GITHUB_PERSONAL_ACCESS_TOKEN")
 
         if not self.github_token:
@@ -41,6 +50,25 @@ class AIAssist:
         # Set limits
         self.max_lines_per_file = 1000
         self.total_data_cap = 100 * 1024  # 100 KB
+
+        self.client = genai.Client(
+            vertexai=True,
+            project=os.getenv("AI_ASSIST_GCP_PROJECT_ID"),
+            location=os.getenv("CODE_OPTIMIZER_GCP_LOCATION"),
+        )
+
+        model = "projects/{}/locations/{}/publishers/google/models/{}".format(
+             os.getenv("AI_ASSIST_GCP_PROJECT_ID"),
+            os.getenv("CODE_OPTIMIZER_GCP_LOCATION"),
+            os.getenv("AI_ASSIST_VERTEX_MODEL_NAME"),
+        )
+
+        response = self.client.models.generate_content(
+            model=model,
+            contents="Hello"
+        )
+
+        print(response)
 
     def is_code_file(self, file_name: str) -> bool:
         """

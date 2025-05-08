@@ -7,6 +7,8 @@ from dotenv import load_dotenv
 from typing import List, Dict
 import vertexai
 from vertexai.generative_models import GenerativeModel
+import git
+import tempfile
 
 load_dotenv()
 
@@ -343,15 +345,94 @@ class AIAssist:
         except Exception as e:
             raise ValueError(f"Error applying Git diff and committing changes: {str(e)}")
 
+    def apply_git_diff_and_commit_gitpython(self, repo_url: str, git_diff: str, task_description: str):
+        """
+        Apply the Git diff to the repository, commit the changes, and push them to GitHub using gitpython.
+        """
+        try:
+            # Extract repository name and owner
+            repo_name = repo_url.split("/")[-1]
+            repo_owner = repo_url.split("/")[-2]
+
+            # Clone the repository to a temporary directory
+            temp_dir = tempfile.mkdtemp()
+            print(f"Cloning repository {repo_url} to {temp_dir}...")
+            repo = git.Repo.clone_from(repo_url, temp_dir, branch="main")
+
+            # Apply the Git diff
+            print("Applying Git diff...")
+            diff_file_path = os.path.join(temp_dir, "temp_diff.patch")
+            with open(diff_file_path, "w") as diff_file:
+                diff_file.write(git_diff)
+
+            repo.git.apply(diff_file_path)
+            print("Git diff applied successfully.")
+
+            # Commit the changes
+            print("Committing changes...")
+            repo.git.add(A=True)  # Stage all changes
+            repo.git.commit(m=f"AI-generated changes for task: {task_description}")
+            print("Changes committed successfully.")
+
+            # Push the changes
+            print("Pushing changes to GitHub...")
+            origin = repo.remote(name="origin")
+            origin.push()
+            print("Changes pushed to GitHub successfully.")
+
+        except Exception as e:
+            raise ValueError(f"Error applying Git diff and committing changes using gitpython: {str(e)}")
+
+    def test_simple_commit(self, repo_url: str):
+        """
+        Test the ability to commit and push changes by creating a simple test.txt file in the root folder of the repository.
+        """
+        try:
+            repo_name = repo_url.split("/")[-1]
+            user = self.github_client.get_user()
+            repo = user.get_repo(repo_name)
+
+            # File details
+            file_path = "test.txt"
+            file_content = "This is a test file created to verify commit and push functionality."
+            commit_message = "Test commit: Adding test.txt file"
+
+            # Check if the file already exists
+            try:
+                existing_file = repo.get_contents(file_path)
+                # Update the file if it exists
+                repo.update_file(
+                    path=file_path,
+                    message=commit_message,
+                    content=file_content,
+                    sha=existing_file.sha
+                )
+                print(f"Updated existing file: {file_path}")
+            except Exception:
+                # Create the file if it does not exist
+                repo.create_file(
+                    path=file_path,
+                    message=commit_message,
+                    content=file_content
+                )
+                print(f"Created new file: {file_path}")
+
+            print("Test commit and push completed successfully.")
+
+        except Exception as e:
+            raise ValueError(f"Error during test commit: {str(e)}")
+
 if __name__ == "__main__":
     analyzer = AIAssist()
     repo_url = "https://github.com/ibrahimelnemr/mern-exercise-tracker-mongodb"
 
-    # Analyze the repository
-    # print("Analyzing repository...")
-    # analysis_result = analyzer.analyze_repository(repo_url)
-    # print("Analysis Result:")
-    # print(analysis_result)
+    # Test simple commit
+    print("\nTesting simple commit...")
+    try:
+        analyzer.test_simple_commit(repo_url)
+        print("Simple commit test completed successfully.")
+    except Exception as e:
+        print(f"Error during simple commit test: {e}")
 
     # Task description for AI Assist
     task_description = (
@@ -365,10 +446,18 @@ if __name__ == "__main__":
     print("Generated Git Diff:")
     print(git_diff)
 
-    # Apply the Git diff and commit the changes
-    print("\nApplying Git diff and committing changes...")
+    # Apply the Git diff and commit the changes using PyGithub
+    print("\nApplying Git diff and committing changes using PyGithub...")
     try:
         analyzer.apply_git_diff_and_commit(repo_url, git_diff, task_description)
-        print("Changes applied and committed successfully.")
+        print("Changes applied and committed successfully using PyGithub.")
     except Exception as e:
-        print(f"Error applying changes: {e}")
+        print(f"Error applying changes using PyGithub: {e}")
+
+    # Apply the Git diff and commit the changes using gitpython
+    print("\nApplying Git diff and committing changes using gitpython...")
+    try:
+        analyzer.apply_git_diff_and_commit_gitpython(repo_url, git_diff, task_description)
+        print("Changes applied and committed successfully using gitpython.")
+    except Exception as e:
+        print(f"Error applying changes using gitpython: {e}")

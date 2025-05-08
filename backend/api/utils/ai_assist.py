@@ -348,10 +348,10 @@ if __name__ == "__main__":
     repo_url = "https://github.com/ibrahimelnemr/mern-exercise-tracker-mongodb"
 
     # Analyze the repository
-    print("Analyzing repository...")
-    analysis_result = analyzer.analyze_repository(repo_url)
-    print("Analysis Result:")
-    print(analysis_result)
+    # print("Analyzing repository...")
+    # analysis_result = analyzer.analyze_repository(repo_url)
+    # print("Analysis Result:")
+    # print(analysis_result)
 
     # Task description for AI Assist
     task_description = (

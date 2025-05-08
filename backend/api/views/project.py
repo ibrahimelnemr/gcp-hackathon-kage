@@ -156,6 +156,43 @@ def get_project_details(request, project_id):
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
+    
+@api_view(['GET'])
+def get_project_repo_details(request, project_id):
+    """
+    Fetch all project details, including linked repository and tasks.
+    """
+    try:
+        project = Project.objects.get(id=project_id)
+        tasks = Task.objects.filter(project_id=project_id)
+
+        # Serialize project data
+        project_data = {
+            "id": project.id,
+            "name": project.name,
+            "description": project.description,
+            "github_repo": {
+                "id": project.github_repo.id if project.github_repo else None,
+                "url": project.github_repo.github_url if project.github_repo else None,
+            },
+            "tasks": [
+                {
+                    "id": task.id,
+                    "description": task.description,
+                    "status": task.status,
+                    "employee_name": task.employee.name if task.employee else None,
+                }
+                for task in tasks
+            ],
+        }
+
+        return JsonResponse(project_data, status=200)
+
+    except Project.DoesNotExist:
+        return JsonResponse({"error": "Project not found."}, status=404)
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
 
 @api_view(['POST'])
 def manage_project_employees(request, project_id):

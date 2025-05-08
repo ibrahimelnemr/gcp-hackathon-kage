@@ -20,10 +20,11 @@ export function AIAssist() {
       try {
         const data = await sendRequest({
           method: 'get',
-          url: `${BACKEND_URL}/project/${projectId}`,
+          url: `${BACKEND_URL}/project/${projectId}/details/`,
         });
-        if (data.github_repo && data.github_repo.github_url) {
-          setRepoUrl(data.github_repo.github_url);
+
+        if (data.github_repo && data.github_repo.url) {
+          setRepoUrl(data.github_repo.url);
         } else {
           setError('No repository linked to this project.');
         }

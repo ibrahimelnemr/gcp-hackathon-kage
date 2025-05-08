@@ -19,4 +19,5 @@ urlpatterns = [
     path('project/repos/', get_projects_with_repos, name='get_projects_with_repos'),
     path('project/<int:project_id>/link-repo/', link_project_to_repo, name='link_project_to_repo'),
     path('project/<int:project_id>/unlink-repo/', unlink_project_from_repo, name='unlink_project_from_repo'),
+    path('project/<int:project_id>/details/', get_project_repo_details, name='get_project_repo_details'),
 ]

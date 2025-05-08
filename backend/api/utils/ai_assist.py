@@ -299,7 +299,7 @@ class AIAssist:
 
     def apply_git_diff_and_commit(self, repo_url: str, git_diff: str, task_description: str):
         """
-        Apply the Git diff to the repository and commit the changes.
+        Apply the Git diff to the repository, commit the changes, and push them to GitHub.
         """
         try:
             repo_name = repo_url.split("/")[-1]
@@ -319,13 +319,26 @@ class AIAssist:
                         new_content.append(line)
 
                 # Fetch the file from the repository
-                file = repo.get_contents(file_path)
-                repo.update_file(
-                    path=file_path,
-                    message=f"AI-generated changes for task: {task_description}",
-                    content="\n".join(new_content),
-                    sha=file.sha
-                )
+                try:
+                    file = repo.get_contents(file_path)
+                    repo.update_file(
+                        path=file_path,
+                        message=f"AI-generated changes for task: {task_description}",
+                        content="\n".join(new_content),
+                        sha=file.sha
+                    )
+                    print(f"Updated file: {file_path}")
+                except Exception as e:
+                    # If the file does not exist, create it
+                    repo.create_file(
+                        path=file_path,
+                        message=f"AI-generated changes for task: {task_description}",
+                        content="\n".join(new_content)
+                    )
+                    print(f"Created new file: {file_path}")
+
+            # Push changes (GitHub API automatically reflects changes in the repository)
+            print("Changes committed and pushed to the repository.")
 
         except Exception as e:
             raise ValueError(f"Error applying Git diff and committing changes: {str(e)}")

@@ -588,29 +588,38 @@ class AIAssist:
             user = self.github_client.get_user()
             repo = user.get_repo(repo_name)
 
+            # Group changes by file path
+            changes_by_file = {}
             for change in changes:
                 file_path = change["file_path"]
-                line_number = change["line_number"]
-                action = change["action"]
-                content = change.get("content", "")
+                if file_path not in changes_by_file:
+                    changes_by_file[file_path] = []
+                changes_by_file[file_path].append(change)
 
-                # Fetch the latest file content and SHA
+            # Apply changes file by file
+            for file_path, file_changes in changes_by_file.items():
                 try:
+                    # Fetch the latest file content and SHA
                     file = repo.get_contents(file_path)
                     current_content = file.decoded_content.decode("utf-8")
                     lines = current_content.splitlines()
 
-                    # Apply the change
-                    if action == "add":
-                        lines.insert(line_number - 1, content)
-                    elif action == "remove":
-                        lines.pop(line_number - 1)
+                    # Apply all changes for this file
+                    for change in file_changes:
+                        line_number = change["line_number"]
+                        action = change["action"]
+                        content = change.get("content", "")
 
-                    # Update the file
+                        if action == "add":
+                            lines.insert(line_number - 1, content)
+                        elif action == "remove":
+                            lines.pop(line_number - 1)
+
+                    # Update the file with all changes
                     updated_content = "\n".join(lines)
                     repo.update_file(
                         path=file_path,
-                        message=f"AI-generated change for {file_path}",
+                        message=f"AI-generated changes for {file_path}",
                         content=updated_content,
                         sha=file.sha  # Use the latest SHA
                     )

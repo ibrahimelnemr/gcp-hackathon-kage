@@ -1,4 +1,4 @@
-import os
+import os, json
 import logging
 from datetime import datetime
 from github import Github
@@ -9,6 +9,7 @@ import vertexai
 from vertexai.generative_models import GenerativeModel
 import git
 import tempfile
+
 
 load_dotenv()
 
@@ -237,6 +238,45 @@ class AIAssist:
         """
         return prompt
 
+    def create_prompt_for_json_changes(self, repo_name: str, files: List[Dict[str, str]], task_description: str) -> str:
+        """
+        Create a prompt for the Gemini AI model to output changes in JSON format.
+        """
+        file_list = "\n".join(f"- {file['name']}" for file in files)  # Fixed list comprehension
+        prompt = f"""
+        You are an expert software engineer and repository analyzer. Your task is to analyze the repository "{repo_name}" and provide changes to meet the following task:
+
+        **Task Description:**
+        {task_description}
+
+        **Repository Structure:**
+        {file_list}
+
+        **Instructions:**
+        1. Provide the changes required to meet the task in JSON format.
+        2. Each object in the JSON array should represent a change with the following fields:
+           - "file_path": The path to the file to be modified.
+           - "line_number": The line number where the change should be made.
+           - "action": Either "add" or "remove".
+           - "content": The content to add (only for "add" actions).
+
+        **Example Output:**
+        [
+            {{
+                "file_path": "src/index.html",
+                "line_number": 3,
+                "action": "add",
+                "content": "<meta name='viewport' content='width=device-width, initial-scale=1.0'>"
+            }},
+            {{
+                "file_path": "src/index.html",
+                "line_number": 5,
+                "action": "remove"
+            }}
+        ]
+        """
+        return prompt
+
     def analyze_repository(self, repo_url: str) -> Dict:
         """
         Analyze the repository and return tasks and refactors.
@@ -298,6 +338,34 @@ class AIAssist:
                 raise ValueError("Failed to generate Git diff from Gemini AI.")
         except Exception as e:
             raise ValueError(f"Error generating Git diff: {str(e)}")
+
+    def generate_json_changes(self, repo_url: str, task_description: str) -> str:
+        """
+        Generate a JSON document for the given task description.
+        """
+        try:
+            # Fetch repository files
+            repo_name = repo_url.split("/")[-1]
+            files = self.fetch_repository_files(repo_url)
+
+            # Create prompt
+            prompt = self.create_prompt_for_json_changes(repo_name, files, task_description)
+
+            # Generate response from Gemini AI
+            generation_config = {
+                "temperature": 0.2,
+                "max_output_tokens": 4096,
+            }
+            response = self.model.generate_content(prompt, generation_config=generation_config)
+
+            # Parse response
+            if hasattr(response, "text"):
+                self.write_model_response_to_file(repo_name, response.text, task_description)
+                return response.text
+            else:
+                raise ValueError("Failed to generate JSON changes from Gemini AI.")
+        except Exception as e:
+            raise ValueError(f"Error generating JSON changes: {str(e)}")
 
     def apply_git_diff_and_commit(self, repo_url: str, git_diff: str, task_description: str):
         """
@@ -461,17 +529,115 @@ class AIAssist:
         except Exception as e:
             raise ValueError(f"Error during test commit: {str(e)}")
 
+    def save_json_to_file(self, repo_name: str, json_data: str):
+        """
+        Save the JSON document to the output directory.
+        """
+        print(f"Saving JSON document for repository: {repo_name}")
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        output_file = os.path.join(self.output_dir, f"ai_assist_json_{timestamp}.json")
+
+        with open(output_file, "w", encoding="utf-8") as f:
+            f.write(json_data)
+
+        print(f"JSON document saved to: {output_file}")
+        return output_file
+
+    def parse_json_file(self, json_file_path: str) -> List[Dict[str, str]]:
+        """
+        Parse the JSON document from the file.
+        """
+        print(f"Parsing JSON document from: {json_file_path}")
+        with open(json_file_path, "r", encoding="utf-8") as f:
+            return json.load(f)
+
+    def apply_changes_with_pygithub(self, repo_url: str, changes: List[Dict[str, str]]):
+        """
+        Apply changes using PyGithub.
+        """
+        try:
+            repo_name = repo_url.split("/")[-1]
+            user = self.github_client.get_user()
+            repo = user.get_repo(repo_name)
+
+            for change in changes:
+                file_path = change["file_path"]
+                line_number = change["line_number"]
+                action = change["action"]
+                content = change.get("content", "")
+
+                # Fetch the file
+                file = repo.get_contents(file_path)
+                current_content = file.decoded_content.decode("utf-8")
+                lines = current_content.splitlines()
+
+                # Apply the change
+                if action == "add":
+                    lines.insert(line_number - 1, content)
+                elif action == "remove":
+                    lines.pop(line_number - 1)
+
+                # Update the file
+                updated_content = "\n".join(lines)
+                repo.update_file(
+                    path=file_path,
+                    message=f"AI-generated change for {file_path}",
+                    content=updated_content,
+                    sha=file.sha
+                )
+                print(f"Updated file: {file_path}")
+
+        except Exception as e:
+            raise ValueError(f"Error applying changes with PyGithub: {str(e)}")
+
+    def apply_changes_with_gitpython(self, repo_url: str, changes: List[Dict[str, str]]):
+        """
+        Apply changes using GitPython.
+        """
+        try:
+            repo_name = repo_url.split("/")[-1]
+            clone_dir = os.path.abspath(os.path.join("backend", "cloned_repos", repo_name))
+            if os.path.exists(clone_dir):
+                import shutil
+                shutil.rmtree(clone_dir)
+
+            print(f"Cloning repository {repo_url} to {clone_dir}...")
+            repo = git.Repo.clone_from(repo_url, clone_dir, branch="main")
+
+            for change in changes:
+                file_path = os.path.join(clone_dir, change["file_path"])
+                line_number = change["line_number"]
+                action = change["action"]
+                content = change.get("content", "")
+
+                # Read the file
+                with open(file_path, "r", encoding="utf-8") as f:
+                    lines = f.readlines()
+
+                # Apply the change
+                if action == "add":
+                    lines.insert(line_number - 1, content + "\n")
+                elif action == "remove":
+                    lines.pop(line_number - 1)
+
+                # Write the updated content back to the file
+                with open(file_path, "w", encoding="utf-8") as f:
+                    f.writelines(lines)
+
+                print(f"Updated file: {file_path}")
+
+            # Commit and push changes
+            repo.git.add(A=True)
+            repo.git.commit(m="AI-generated changes")
+            repo.remote(name="origin").push()
+            print("Changes pushed to GitHub successfully.")
+
+        except Exception as e:
+            raise ValueError(f"Error applying changes with GitPython: {str(e)}")
+
 if __name__ == "__main__":
     analyzer = AIAssist()
     repo_url = "https://github.com/ibrahimelnemr/mern-exercise-tracker-mongodb"
-
-    # Test simple commit
-    # print("\nTesting simple commit...")
-    # try:
-    #     analyzer.test_simple_commit(repo_url)
-    #     print("Simple commit test completed successfully.")
-    # except Exception as e:
-    #     print(f"Error during simple commit test: {e}")
 
     # Task description for AI Assist
     task_description = (
@@ -479,24 +645,29 @@ if __name__ == "__main__":
         "Enhance the backend API and frontend form logic for creating exercises to include robust validation and user-friendly error handling."
     )
 
-    # Generate Git diff for the task
-    print("\nGenerating Git diff for the task...")
-    git_diff = analyzer.generate_git_diff(repo_url, task_description)
-    print("Generated Git Diff:")
-    print(git_diff)
-
-    # Apply the Git diff and commit the changes using PyGithub
-    print("\nApplying Git diff and committing changes using PyGithub...")
+    # Generate JSON changes for the task
+    print("\nGenerating JSON changes for the task...")
     try:
-        analyzer.apply_git_diff_and_commit(repo_url, git_diff, task_description)
-        print("Changes applied and committed successfully using PyGithub.")
-    except Exception as e:
-        print(f"Error applying changes using PyGithub: {e}")
+        json_changes = analyzer.generate_json_changes(repo_url, task_description)
+        print("Generated JSON Changes:")
+        print(json_changes)
 
-    # Apply the Git diff and commit the changes using gitpython
-    print("\nApplying Git diff and committing changes using gitpython...")
-    try:
-        analyzer.apply_git_diff_and_commit_gitpython(repo_url, git_diff, task_description)
-        print("Changes applied and committed successfully using gitpython.")
+        # Save the JSON document to the output directory
+        json_file_path = analyzer.save_json_to_file(repo_url.split("/")[-1], json_changes)
+
+        # Parse the JSON document
+        print("\nParsing JSON document...")
+        changes = analyzer.parse_json_file(json_file_path)
+
+        # Apply the changes using PyGithub
+        print("\nApplying changes using PyGithub...")
+        analyzer.apply_changes_with_pygithub(repo_url, changes)
+        print("Changes applied successfully using PyGithub.")
+
+        # Apply the changes using GitPython
+        print("\nApplying changes using GitPython...")
+        analyzer.apply_changes_with_gitpython(repo_url, changes)
+        print("Changes applied successfully using GitPython.")
+
     except Exception as e:
-        print(f"Error applying changes using gitpython: {e}")
+        print(f"Error generating or applying JSON changes: {e}")

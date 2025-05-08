@@ -3,3 +3,4 @@ output_plans
 secret
 .env
 cloned_repos
+backend/cloned_repos

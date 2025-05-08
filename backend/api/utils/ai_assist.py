@@ -362,7 +362,7 @@ class AIAssist:
             repo_owner = repo_url.split("/")[-2]
 
             # Clone the repository to a specific directory
-            clone_dir = os.path.join("cloned_repos", repo_name)
+            clone_dir = os.path.abspath(os.path.join("backend", "cloned_repos", repo_name))
             if os.path.exists(clone_dir):
                 print(f"Deleting existing directory: {clone_dir}")
                 import shutil
@@ -380,10 +380,14 @@ class AIAssist:
             cleaned_diff = "\n".join(line.rstrip() for line in git_diff.splitlines())
 
             # Save the Git diff as a patch file
-            print("Saving Git diff as a patch file...")
             patch_file_path = os.path.join(clone_dir, "temp_diff.patch")
+            print(f"Saving Git diff as a patch file at: {patch_file_path}")
             with open(patch_file_path, "w") as patch_file:
                 patch_file.write(cleaned_diff)
+
+            # Verify that the patch file exists
+            if not os.path.exists(patch_file_path):
+                raise FileNotFoundError(f"Patch file not found at: {patch_file_path}")
 
             # Apply the patch using `git am`
             print("Applying Git diff using `git am`...")

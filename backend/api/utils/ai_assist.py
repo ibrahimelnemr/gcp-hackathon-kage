@@ -304,8 +304,10 @@ class AIAssist:
             # Parse response
             if hasattr(response, "text"):
                 print("AI response generated successfully.")
+                sanitized_response = self.sanitize_json_content(response.text)
+                parsed_response = json.loads(sanitized_response)  # Parse the sanitized response
                 self.write_model_response_to_file(repo_name, response.text)
-                return response.text
+                return parsed_response
             else:
                 raise ValueError("Failed to generate response from Gemini AI.")
         except Exception as e:

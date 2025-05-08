@@ -632,52 +632,6 @@ class AIAssist:
         except Exception as e:
             raise ValueError(f"Error applying changes with PyGithub: {str(e)}")
 
-    def apply_changes_with_gitpython(self, repo_url: str, changes: List[Dict[str, str]]):
-        """
-        Apply changes using GitPython.
-        """
-        try:
-            repo_name = repo_url.split("/")[-1]
-            clone_dir = os.path.abspath(os.path.join("backend", "cloned_repos", repo_name))
-            if os.path.exists(clone_dir):
-                import shutil
-                shutil.rmtree(clone_dir)
-
-            print(f"Cloning repository {repo_url} to {clone_dir}...")
-            repo = git.Repo.clone_from(repo_url, clone_dir, branch="main")
-
-            for change in changes:
-                file_path = os.path.join(clone_dir, change["file_path"])
-                line_number = change["line_number"]
-                action = change["action"]
-                content = change.get("content", "")
-
-                # Read the file
-                with open(file_path, "r", encoding="utf-8") as f:
-                    lines = f.readlines()
-
-                # Apply the change
-                if action == "add":
-                    lines.insert(line_number - 1, content + "\n")
-                elif action == "remove":
-                    lines.pop(line_number - 1)
-
-                # Write the updated content back to the file
-                with open(file_path, "w", encoding="utf-8") as f:
-                    f.writelines(lines)
-
-                print(f"Updated file: {file_path}")
-
-            # Commit and push changes
-            repo.git.add(A=True)
-            repo.git.commit(m="AI-generated changes")
-            repo.remote(name="origin").push()
-            print("Changes pushed to GitHub successfully.")
-
-        except Exception as e:
-            raise ValueError(f"Error applying changes with GitPython: {str(e)}")
-
-
 
 if __name__ == "__main__":
     analyzer = AIAssist()
@@ -707,11 +661,6 @@ if __name__ == "__main__":
         print("\nApplying changes using PyGithub...")
         analyzer.apply_changes_with_pygithub(repo_url, changes)
         print("Changes applied successfully using PyGithub.")
-
-        # Apply the changes using GitPython
-        print("\nApplying changes using GitPython...")
-        analyzer.apply_changes_with_gitpython(repo_url, changes)
-        print("Changes applied successfully using GitPython.")
 
     except Exception as e:
         print(f"Error generating or applying JSON changes: {e}")

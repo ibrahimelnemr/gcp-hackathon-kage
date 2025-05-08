@@ -254,7 +254,8 @@ class AIAssist:
 
         **Instructions:**
         1. Provide the changes required to meet the task in JSON format.
-        2. Each object in the JSON array should represent a change with the following fields:
+        2. Do not include any Markdown indicators like ```json or ``` in your response.
+        3. Each object in the JSON array should represent a change with the following fields:
            - "file_path": The path to the file to be modified.
            - "line_number": The line number where the change should be made.
            - "action": Either "add" or "remove".
@@ -528,6 +529,25 @@ class AIAssist:
 
         except Exception as e:
             raise ValueError(f"Error during test commit: {str(e)}")
+    
+    @classmethod
+    def sanitize_json_content(cls, json_content: str) -> str:
+        """
+        Sanitize the JSON content by removing Markdown indicators like ```json and ```.
+
+        Args:
+            json_content (str): The raw JSON content.
+
+        Returns:
+            str: The sanitized JSON content.
+        """
+        # Remove Markdown indicators
+        sanitized_content = json_content.strip()
+        if sanitized_content.startswith("```json"):
+            sanitized_content = sanitized_content[7:]  # Remove the leading ```json
+        if sanitized_content.endswith("```"):
+            sanitized_content = sanitized_content[:-3]  # Remove the trailing ```
+        return sanitized_content.strip()
 
     def save_json_to_file(self, repo_name: str, json_data: str):
         """
@@ -546,10 +566,18 @@ class AIAssist:
     def parse_json_file(self, json_file_path: str) -> List[Dict[str, str]]:
         """
         Parse the JSON document from the file.
+
+        Args:
+            json_file_path (str): The path to the JSON file.
+
+        Returns:
+            List[Dict[str, str]]: The parsed JSON content.
         """
         print(f"Parsing JSON document from: {json_file_path}")
         with open(json_file_path, "r", encoding="utf-8") as f:
-            return json.load(f)
+            raw_content = f.read()
+            sanitized_content = AIAssist.sanitize_json_content(raw_content)  # Call as class method
+            return json.loads(sanitized_content)
 
     def apply_changes_with_pygithub(self, repo_url: str, changes: List[Dict[str, str]]):
         """
@@ -634,6 +662,8 @@ class AIAssist:
 
         except Exception as e:
             raise ValueError(f"Error applying changes with GitPython: {str(e)}")
+
+
 
 if __name__ == "__main__":
     analyzer = AIAssist()

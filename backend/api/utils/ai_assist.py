@@ -16,9 +16,9 @@ class AIAssist:
         os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("AI_ASSIST_GOOGLE_APPLICATION_CREDENTIALS")
         load_dotenv()
 
-        self.project_id = os.getenv("AI_ASSIST_GCP_PROJECT_ID")
+        self.project_id = os.getenv("KAGE_GCP_PROJECT_ID")
         self.location = os.getenv("AI_ASSIST_GCP_LOCATION", "us-central1")
-        self.model_name = os.getenv("AI_ASSIST_VERTEX_MODEL_NAME", "gemini-1.5-flash-001")
+        self.model_name = os.getenv("AI_ASSIST_VERTEX_MODEL_NAME", "gemini-1.5-flash-002")
         self.github_token = os.getenv("GITHUB_PERSONAL_ACCESS_TOKEN")
 
         if not self.github_token:
@@ -41,6 +41,10 @@ class AIAssist:
         # Set limits
         self.max_lines_per_file = 1000
         self.total_data_cap = 100 * 1024  # 100 KB
+
+        response = self.model.generate_content("Hello")
+
+        print(response)
 
     def is_code_file(self, file_name: str) -> bool:
         """
@@ -329,5 +333,29 @@ class AIAssist:
 if __name__ == "__main__":
     analyzer = AIAssist()
     repo_url = "https://github.com/ibrahimelnemr/mern-exercise-tracker-mongodb"
-    result = analyzer.analyze_repository(repo_url)
-    print(result)
+
+    # Analyze the repository
+    print("Analyzing repository...")
+    analysis_result = analyzer.analyze_repository(repo_url)
+    print("Analysis Result:")
+    print(analysis_result)
+
+    # Task description for AI Assist
+    task_description = (
+        "Add Validation and Error Handling for Exercise Creation. "
+        "Enhance the backend API and frontend form logic for creating exercises to include robust validation and user-friendly error handling."
+    )
+
+    # Generate Git diff for the task
+    print("\nGenerating Git diff for the task...")
+    git_diff = analyzer.generate_git_diff(repo_url, task_description)
+    print("Generated Git Diff:")
+    print(git_diff)
+
+    # Apply the Git diff and commit the changes
+    print("\nApplying Git diff and committing changes...")
+    try:
+        analyzer.apply_git_diff_and_commit(repo_url, git_diff, task_description)
+        print("Changes applied and committed successfully.")
+    except Exception as e:
+        print(f"Error applying changes: {e}")

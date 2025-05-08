@@ -301,14 +301,14 @@ class AIAssist:
 
     def apply_git_diff_and_commit(self, repo_url: str, git_diff: str, task_description: str):
         """
-        Apply the Git diff to the repository, commit the changes, and push them to GitHub.
+        Apply the Git diff to the repository, validate changes, and push them to GitHub.
         """
         try:
             repo_name = repo_url.split("/")[-1]
             user = self.github_client.get_user()
             repo = user.get_repo(repo_name)
 
-            # Parse the Git diff and apply changes
+            # Parse the Git diff and validate changes
             for diff in git_diff.split("diff --git")[1:]:
                 lines = diff.strip().split("\n")
                 file_path = lines[0].split(" ")[1][2:]  # Extract file path from diff header
@@ -323,9 +323,17 @@ class AIAssist:
                 # Fetch the file from the repository
                 try:
                     file = repo.get_contents(file_path)
+                    current_content = file.decoded_content.decode("utf-8")
+
+                    # Validate the diff context
+                    if not current_content.startswith("\n".join(lines[2:])):
+                        print(f"Skipping file {file_path} due to mismatched context.")
+                        continue
+
+                    # Update the file
                     repo.update_file(
                         path=file_path,
-                        message=f"AI-generated changes for task: {task_description}",
+                        message=f"AI-generated changes for {file_path}: {task_description}",
                         content="\n".join(new_content),
                         sha=file.sha
                     )
@@ -334,13 +342,12 @@ class AIAssist:
                     # If the file does not exist, create it
                     repo.create_file(
                         path=file_path,
-                        message=f"AI-generated changes for task: {task_description}",
+                        message=f"AI-generated changes for {file_path}: {task_description}",
                         content="\n".join(new_content)
                     )
                     print(f"Created new file: {file_path}")
 
-            # Push changes (GitHub API automatically reflects changes in the repository)
-            print("Changes committed and pushed to the repository.")
+            print("All changes committed and pushed to the repository.")
 
         except Exception as e:
             raise ValueError(f"Error applying Git diff and committing changes: {str(e)}")
@@ -354,19 +361,37 @@ class AIAssist:
             repo_name = repo_url.split("/")[-1]
             repo_owner = repo_url.split("/")[-2]
 
-            # Clone the repository to a temporary directory
-            temp_dir = tempfile.mkdtemp()
-            print(f"Cloning repository {repo_url} to {temp_dir}...")
-            repo = git.Repo.clone_from(repo_url, temp_dir, branch="main")
+            # Clone the repository to a specific directory
+            clone_dir = os.path.join("cloned_repos", repo_name)
+            if os.path.exists(clone_dir):
+                print(f"Deleting existing directory: {clone_dir}")
+                import shutil
+                shutil.rmtree(clone_dir)
 
-            # Apply the Git diff
-            print("Applying Git diff...")
-            diff_file_path = os.path.join(temp_dir, "temp_diff.patch")
-            with open(diff_file_path, "w") as diff_file:
-                diff_file.write(git_diff)
+            print(f"Cloning repository {repo_url} to {clone_dir}...")
+            repo = git.Repo.clone_from(repo_url, clone_dir, branch="main")
 
-            repo.git.apply(diff_file_path)
-            print("Git diff applied successfully.")
+            # Set Git user configuration
+            print("Configuring Git user...")
+            repo.config_writer().set_value("user", "name", "AI Assistant").release()
+            repo.config_writer().set_value("user", "email", "ai-assistant@example.com").release()
+
+            # Clean up the Git diff to remove trailing whitespace
+            cleaned_diff = "\n".join(line.rstrip() for line in git_diff.splitlines())
+
+            # Save the Git diff as a patch file
+            print("Saving Git diff as a patch file...")
+            patch_file_path = os.path.join(clone_dir, "temp_diff.patch")
+            with open(patch_file_path, "w") as patch_file:
+                patch_file.write(cleaned_diff)
+
+            # Apply the patch using `git am`
+            print("Applying Git diff using `git am`...")
+            try:
+                repo.git.am(patch_file_path)
+                print("Git diff applied successfully using `git am`.")
+            except Exception as e:
+                raise ValueError(f"Error applying Git diff using `git am`: {str(e)}")
 
             # Commit the changes
             print("Committing changes...")
@@ -379,6 +404,11 @@ class AIAssist:
             origin = repo.remote(name="origin")
             origin.push()
             print("Changes pushed to GitHub successfully.")
+
+            # Clean up the cloned repository
+            print(f"Deleting cloned repository: {clone_dir}")
+            import shutil
+            shutil.rmtree(clone_dir)
 
         except Exception as e:
             raise ValueError(f"Error applying Git diff and committing changes using gitpython: {str(e)}")
@@ -427,12 +457,12 @@ if __name__ == "__main__":
     repo_url = "https://github.com/ibrahimelnemr/mern-exercise-tracker-mongodb"
 
     # Test simple commit
-    print("\nTesting simple commit...")
-    try:
-        analyzer.test_simple_commit(repo_url)
-        print("Simple commit test completed successfully.")
-    except Exception as e:
-        print(f"Error during simple commit test: {e}")
+    # print("\nTesting simple commit...")
+    # try:
+    #     analyzer.test_simple_commit(repo_url)
+    #     print("Simple commit test completed successfully.")
+    # except Exception as e:
+    #     print(f"Error during simple commit test: {e}")
 
     # Task description for AI Assist
     task_description = (

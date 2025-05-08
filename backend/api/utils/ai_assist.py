@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 from typing import List, Dict
 import vertexai
 from vertexai.generative_models import GenerativeModel
-import git
 import tempfile
 
 

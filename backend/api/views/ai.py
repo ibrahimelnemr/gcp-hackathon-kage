@@ -181,3 +181,24 @@ def ai_assist_functionality(request):
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
 
+@api_view(['POST'])
+def commit_ai_changes(request):
+    """
+    Commit AI-generated changes to the repository.
+    """
+    try:
+        data = json.loads(request.body)
+        repo_url = data.get("repo_url")
+        changes = data.get("changes")
+
+        if not repo_url or not changes:
+            return JsonResponse({"error": "Both 'repo_url' and 'changes' are required."}, status=400)
+
+        ai_assist = AIAssist()
+        ai_assist.apply_changes_with_pygithub(repo_url, changes)
+
+        return JsonResponse({"message": "Changes committed successfully."}, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+

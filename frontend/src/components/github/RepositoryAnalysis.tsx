@@ -4,6 +4,9 @@ import { Button } from '@/components/ui/button';
 import HttpHook from '@/hooks/HttpHook';
 import { BACKEND_URL } from '@/data/Data';
 import { useLoading } from '@/hooks/useLoading';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { motion } from 'framer-motion';
+import { AIAssistPopup } from './AIAssistPopup';
 
 export function RepositoryAnalysis() {
   const { projectId } = useParams();
@@ -12,6 +15,8 @@ export function RepositoryAnalysis() {
   const [repoUrl, setRepoUrl] = useState<string | null>(null);
   const [analysisResult, setAnalysisResult] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [selectedTaskDescription, setSelectedTaskDescription] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProjectDetails = async () => {
@@ -63,6 +68,16 @@ export function RepositoryAnalysis() {
     }
   };
 
+  const openAIAssistPopup = (taskDescription: string) => {
+    setSelectedTaskDescription(taskDescription);
+    setIsPopupOpen(true);
+  };
+
+  const closeAIAssistPopup = () => {
+    setIsPopupOpen(false);
+    setSelectedTaskDescription(null);
+  };
+
   if (loading) {
     return <LoadingIndicator />;
   }
@@ -78,24 +93,70 @@ export function RepositoryAnalysis() {
           </Button>
           {error && <p className="text-red-500">{error}</p>}
           {analysisResult && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {analysisResult.tasks.map((task: any, index: number) => (
-                <div key={index} className="p-4 border rounded-md shadow-md">
-                  <h3 className="font-bold">Task {index + 1}</h3>
-                  <p>{task.description}</p>
+            <div className="space-y-8">
+              <div>
+                <h2 className="text-2xl font-bold mb-4">Tasks</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {analysisResult.tasks.map((task: any, index: number) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.1 }}
+                    >
+                      <Card className="shadow-lg hover:shadow-xl transition-shadow">
+                        <CardHeader>
+                          <CardTitle>Task {index + 1}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="mb-4">{task.description}</p>
+                          <Button
+                            variant="outline"
+                            onClick={() => openAIAssistPopup(task.description)}
+                          >
+                            Open AI Assist
+                          </Button>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
                 </div>
-              ))}
-              {analysisResult.refactors.map((refactor: any, index: number) => (
-                <div key={index} className="p-4 border rounded-md shadow-md">
-                  <h3 className="font-bold">Refactor {index + 1}</h3>
-                  <p>{refactor.description}</p>
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold mb-4">Refactors</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {analysisResult.refactors.map((refactor: any, index: number) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.3, delay: index * 0.1 }}
+                    >
+                      <Card className="shadow-lg">
+                        <CardHeader>
+                          <CardTitle>Refactor {index + 1}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p>{refactor.description}</p>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
+                  ))}
                 </div>
-              ))}
+              </div>
             </div>
           )}
         </div>
       ) : (
         <p className="text-red-500">{error || 'No repository linked to this project.'}</p>
+      )}
+      {isPopupOpen && (
+        <AIAssistPopup
+          isOpen={isPopupOpen}
+          onClose={closeAIAssistPopup}
+          repoUrl={repoUrl!}
+          taskDescription={selectedTaskDescription!}
+        />
       )}
     </div>
   );

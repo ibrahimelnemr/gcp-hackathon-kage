@@ -594,26 +594,31 @@ class AIAssist:
                 action = change["action"]
                 content = change.get("content", "")
 
-                # Fetch the file
-                file = repo.get_contents(file_path)
-                current_content = file.decoded_content.decode("utf-8")
-                lines = current_content.splitlines()
+                # Fetch the latest file content and SHA
+                try:
+                    file = repo.get_contents(file_path)
+                    current_content = file.decoded_content.decode("utf-8")
+                    lines = current_content.splitlines()
 
-                # Apply the change
-                if action == "add":
-                    lines.insert(line_number - 1, content)
-                elif action == "remove":
-                    lines.pop(line_number - 1)
+                    # Apply the change
+                    if action == "add":
+                        lines.insert(line_number - 1, content)
+                    elif action == "remove":
+                        lines.pop(line_number - 1)
 
-                # Update the file
-                updated_content = "\n".join(lines)
-                repo.update_file(
-                    path=file_path,
-                    message=f"AI-generated change for {file_path}",
-                    content=updated_content,
-                    sha=file.sha
-                )
-                print(f"Updated file: {file_path}")
+                    # Update the file
+                    updated_content = "\n".join(lines)
+                    repo.update_file(
+                        path=file_path,
+                        message=f"AI-generated change for {file_path}",
+                        content=updated_content,
+                        sha=file.sha  # Use the latest SHA
+                    )
+                    print(f"Updated file: {file_path}")
+
+                except Exception as e:
+                    print(f"Error updating file {file_path}: {e}")
+                    continue
 
         except Exception as e:
             raise ValueError(f"Error applying changes with PyGithub: {str(e)}")

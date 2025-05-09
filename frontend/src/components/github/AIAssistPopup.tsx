@@ -23,7 +23,7 @@ interface ProcessedChange {
 
 export function AIAssistPopup({ isOpen, onClose, repoUrl, taskDescription }: AIAssistPopupProps) {
   const { sendRequest } = HttpHook();
-  const[rawJsonChanges, setRawJsonChanges] = useState<any[]>([]);
+  const [rawJsonChanges, setRawJsonChanges] = useState<any[]>([]);
   const [jsonChanges, setJsonChanges] = useState<ProcessedChange[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isCommitted, setIsCommitted] = useState(false);
@@ -89,21 +89,26 @@ export function AIAssistPopup({ isOpen, onClose, repoUrl, taskDescription }: AIA
   };
 
   return (
-    <Popup isOpen={isOpen} onClose={onClose} className="max-w-4xl w-full">
+    <Popup isOpen={isOpen} onClose={onClose} className="max-w-6xl w-full bg-dark text-light">
       <h2 className="text-2xl font-bold mb-4">AI Assist</h2>
       <div className="space-y-4">
         {!isCommitted ? (
           <>
-            <p className="text-sm text-gray-600">Task: {taskDescription}</p>
+            <p className="text-sm text-gray-400">Task: {taskDescription}</p>
             <Button onClick={handleGenerateChanges} disabled={isLoading}>
               {isLoading ? <LoadingSpinner size="sm" /> : 'Generate Changes'}
             </Button>
             {error && <p className="text-red-500">{error}</p>}
-            {jsonChanges.length > 0 && (
-              <div className="h-96 overflow-y-auto border rounded-md p-4 bg-gray-50">
+            {isLoading && (
+              <div className="flex justify-center items-center h-96">
+                <LoadingSpinner size="lg" />
+              </div>
+            )}
+            {!isLoading && jsonChanges.length > 0 && (
+              <div className="h-96 overflow-y-auto border rounded-md p-4 bg-gray-800 text-gray-200">
                 {jsonChanges.map((file, fileIndex) => (
                   <div key={fileIndex} className="mb-6">
-                    <h3 className="font-bold text-lg mb-2">{file.file_path}</h3>
+                    <h3 className="font-bold text-lg mb-2 text-blue-400">{file.file_path}</h3>
                     <div className="space-y-2">
                       {file.changes.map((change, changeIndex) => (
                         <div
@@ -127,7 +132,7 @@ export function AIAssistPopup({ isOpen, onClose, repoUrl, taskDescription }: AIA
                 ))}
               </div>
             )}
-            {jsonChanges.length > 0 && (
+            {!isLoading && jsonChanges.length > 0 && (
               <Button onClick={handleCommitChanges} disabled={isLoading} className="w-full">
                 {isLoading ? <LoadingSpinner size="sm" /> : 'Commit Changes'}
               </Button>

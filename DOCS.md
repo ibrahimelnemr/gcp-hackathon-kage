@@ -197,3 +197,44 @@ For frontend
 `docker tag kage-frontend ibrahimelnemr/kage-frontend:latest`
 
 `docker push ibrahimelnemr/kage-frontend:latest`
+
+
+`gcloud auth login`
+
+add this to `~/.zshrc`
+`export PATH="$PATH:/usr/local/share/google-cloud-sdk/bin"`
+
+`gcloud auth configure-docker us-central1-docker.pkg.dev`
+
+`gcloud projects add-iam-policy-binding centered-accord-442214-b9 --member="user:YOUR_EMAIL@gmail.com" --role="roles/artifactregistry.writer"`
+
+`gcloud artifacts repositories create kage --repository-format=docker --location=us-central1 --description="Kage Docker Images"`
+
+`docker push us-central1-docker.pkg.dev/centered-accord-442214-b9/kage/kage-backend:latest`
+
+
+
+cd backend
+
+docker build -t kage-backend:latest .
+
+docker tag kage-backend:latest \
+  us-central1-docker.pkg.dev/centered-accord-442214-b9/kage/kage-backend:latest
+
+docker push \
+  us-central1-docker.pkg.dev/centered-accord-442214-b9/kage/kage-backend:latest
+
+
+
+
+cd frontend
+
+docker build -t kage-frontend:latest .
+
+docker tag kage-frontend:latest \
+  us-central1-docker.pkg.dev/centered-accord-442214-b9/kage/kage-frontend:latest
+
+docker push \
+  us-central1-docker.pkg.dev/centered-accord-442214-b9/kage/kage-frontend:latest
+
+

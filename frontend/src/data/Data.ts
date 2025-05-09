@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 // export const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8080/';
 export const BACKEND_URL =
@@ -6,12 +6,13 @@ export const BACKEND_URL =
 
 export const SAMPLE_PROJECT_NAME = "AI-Powered Contract Management System";
 
-export const SAMPLE_PROJECT_DESCRIPTION =
-  `Develop a full-stack AI-powered contract management system that allows users to upload contracts (Word or PDF documents), extract key clauses using Natural Language Processing (NLP), and compare them against predefined templates. The system should highlight discrepancies, suggest corrections, and provide a user-friendly interface for review and approval. 
-
-  The project will use React, TypeScript, and TailwindCSS for the frontend, while the backend will be built with Python using Django or Flask to provide a REST API. AI and NLP capabilities will be implemented using Python libraries such as Hugging Face Transformers and spaCy. PostgreSQL will be used as the database, and the application will be hosted on Google Cloud Platform (GCP), leveraging its AI services. Authentication will be implemented using OAuth 2.0 with Google Sign-In, and the deployment will be managed using Docker and Kubernetes.
-
-  The system will include several key features. It will provide user authentication and role-based access control to ensure secure access. Users will be able to upload and store documents, which will then be processed using AI-powered clause extraction and comparison. The system will highlight discrepancies in the documents and suggest corrections. It will also allow task assignment and tracking for team members, enabling real-time collaboration and commenting on documents. Additionally, the system will feature a dashboard for analytics and reporting, providing insights into document processing and team performance.`;
+export const SAMPLE_PROJECT_DESCRIPTION = `Develop a full-stack AI-powered e-commerce platform that allows users to browse, search, and purchase products seamlessly. The platform will include AI-powered predictive features to enhance user experience and optimize business operations. The frontend of the platform will be built using React, TypeScript, and TailwindCSS, ensuring a modern and responsive user interface. The backend will be developed with Python using Flask to provide a robust REST API for handling business logic and data processing. AI and machine learning capabilities will be implemented using Python libraries such as scikit-learn, TensorFlow, or PyTorch to deliver intelligent features.
+  
+  The platform will use PostgreSQL as the database to securely store product, user, and transaction data. It will be hosted on Google Cloud Platform (GCP), leveraging its AI services for scalability and performance. Authentication will be implemented using OAuth 2.0 with Google Sign-In to ensure secure and seamless user access. The deployment process will be managed using Docker and Kubernetes to enable efficient scaling and containerized environments.
+  
+  The platform will include several key features to enhance functionality and user experience. It will provide user authentication and role-based access control to ensure secure access. A comprehensive product catalog will allow users to browse, search, and filter products with ease. AI-powered product recommendations will be generated based on user behavior and purchase history, improving personalization. Predictive inventory management will optimize stock levels using machine learning, reducing overstock and stockouts. Real-time order tracking and notifications will keep users informed about their purchases. Secure payment gateway integration will ensure safe and reliable transactions. An admin dashboard will enable efficient management of products, orders, and users, while an analytics dashboard will provide insights into sales trends and customer behavior.
+  
+  The AI-powered features of the platform will include personalized product recommendations using collaborative filtering and content-based filtering techniques. Predictive analytics will forecast demand and optimize inventory management. Sentiment analysis on customer reviews will identify trends and help improve product offerings. Dynamic pricing optimization will adjust prices based on market trends and competitor analysis, maximizing revenue and customer satisfaction. This e-commerce platform is designed to provide a seamless shopping experience while leveraging AI to drive business growth and operational efficiency.`;
 
 export const SAMPLE_TEAM_MEMBERS = [
   {

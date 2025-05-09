@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 export const BACKEND_URL =
   import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
 
-export const SAMPLE_PROJECT_NAME = "AI-Powered Contract Management System";
+export const SAMPLE_PROJECT_NAME = "AI-Powered E-Commerce Platform";
 
 export const SAMPLE_PROJECT_DESCRIPTION = `Develop a full-stack AI-powered e-commerce platform that allows users to browse, search, and purchase products seamlessly. The platform will include AI-powered predictive features to enhance user experience and optimize business operations. The frontend of the platform will be built using React, TypeScript, and TailwindCSS, ensuring a modern and responsive user interface. The backend will be developed with Python using Flask to provide a robust REST API for handling business logic and data processing. AI and machine learning capabilities will be implemented using Python libraries such as scikit-learn, TensorFlow, or PyTorch to deliver intelligent features.
   

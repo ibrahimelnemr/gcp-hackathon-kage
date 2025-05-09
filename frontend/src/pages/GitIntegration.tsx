@@ -123,11 +123,12 @@ export default function GitIntegration() {
               <p className="text-sm text-muted-foreground mb-4">{project.description}</p>
               {project.repo_url ? (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between bg-gray-700 text-gray-200 px-4 py-2 rounded-md shadow-md">
-                    <div className="flex items-center gap-2">
-                      <Link className="h-5 w-5 text-blue-500" />
-                      <span className="font-mono text-sm truncate">{project.repo_url}</span>
+                  <div className="flex items-center gap-4">
+                  <div className="flex items-center bg-gray-700 text-gray-200 px-4 py-2 rounded-md shadow-md">
+                        <Link className="h-5 w-5 mr-2 text-gray-200" />
+                          <span className="text-sm font-bold">{project.repo_url}</span>
                     </div>
+                    
                     <button
                       onClick={() => unlinkRepo(project.id)}
                       disabled={pageLoading}

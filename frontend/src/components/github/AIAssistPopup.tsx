@@ -105,10 +105,10 @@ export function AIAssistPopup({ isOpen, onClose, repoUrl, taskDescription }: AIA
               </div>
             )}
             {!isLoading && jsonChanges.length > 0 && (
-              <div className="h-96 overflow-y-auto border rounded-md p-4 bg-gray-800 text-gray-200">
+              <div className="h-96 overflow-y-auto border rounded-md p-4  text-gray-200">
                 {jsonChanges.map((file, fileIndex) => (
                   <div key={fileIndex} className="mb-6">
-                    <h3 className="font-bold text-lg mb-2 text-gray-300">{file.file_path}</h3>
+                    <h3 className="font-bold text-lg mb-2 text-gray-300"><code>{file.file_path}</code></h3>
                     <div className="space-y-1">
                       {file.changes.map((change, changeIndex) => (
                         <div
@@ -121,7 +121,8 @@ export function AIAssistPopup({ isOpen, onClose, repoUrl, taskDescription }: AIA
                               : 'text-gray-400'
                           }`}
                         >
-                          <span className="text-gray-500">[{change.line_number}]</span> {change.content}
+                          <code className="text-gray-500">[{change.line_number}]</code>{' '}
+                          <code>{change.content}</code>
                         </div>
                       ))}
                     </div>

@@ -7,7 +7,7 @@ import { useLoading } from '@/hooks/useLoading';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { motion } from 'framer-motion';
 import { AIAssistPopup } from './AIAssistPopup';
-import { Link } from 'lucide-react';
+import { Link, Search, WandSparkles } from 'lucide-react';
 
 export function RepositoryAnalysis() {
   const { projectId } = useParams();
@@ -94,9 +94,15 @@ export function RepositoryAnalysis() {
               <span className="text-sm font-medium">{repoUrl}</span>
             </div>
           </div>
-          <Button onClick={handleAnalyzeRepository} className="mb-4 w-full text-white font-semibold py-2 rounded-md">
-            Analyze Repository
-          </Button>
+          <div className="flex justify-center mb-6">
+            <Button
+              onClick={handleAnalyzeRepository}
+              className="flex items-center gap-2 text-white font-semibold py-2 px-6 rounded-md shadow-md"
+            >
+              <Search className="h-5 w-5" />
+              Analyze Repository
+            </Button>
+          </div>
           {error && <p className="text-red-500 text-center">{error}</p>}
           {analysisResult && (
             <div className="space-y-12">
@@ -111,19 +117,16 @@ export function RepositoryAnalysis() {
                       transition={{ duration: 0.3, delay: index * 0.1 }}
                     >
                       <Card className="shadow-lg hover:shadow-xl transition-shadow relative">
-                        {/* <span className="absolute top-2 right-2 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-md">
-                          Task
-                        </span> */}
                         <CardHeader>
-                          <p className="text-lg font-medium ">{task.description}</p>
+                          <p className="text-lg font-medium text-gray-300">{task.description}</p>
                         </CardHeader>
                         <CardContent>
                           <Button
-                            variant="outline"
                             onClick={() => openAIAssistPopup(task.description)}
-                            className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded-md"
+                            className="bottom-2 left-2 flex items-center gap-2 text-white font-semibold py-1 px-3 rounded-md shadow-md"
                           >
-                            Open AI Assist
+                            <WandSparkles className="h-4 w-4" />
+                            Assist
                           </Button>
                         </CardContent>
                       </Card>

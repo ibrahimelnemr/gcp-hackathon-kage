@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Popup } from '@/components/ui/popup';
+import { Popup } from '@/components/ui/Popup';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import { CheckCircle } from 'lucide-react';
 import HttpHook from '@/hooks/HttpHook';

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Popup } from '@/components/ui/popup';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { CheckCircle } from 'lucide-react';
 import HttpHook from '@/hooks/HttpHook';
 import { BACKEND_URL } from '@/data/Data';
 
@@ -90,22 +91,22 @@ export function AIAssistPopup({ isOpen, onClose, repoUrl, taskDescription }: AIA
 
   return (
     <Popup isOpen={isOpen} onClose={onClose} className="max-w-6xl w-full bg-gray-900 text-gray-100">
-      <h2 className="text-2xl font-bold mb-4">AI Assist</h2>
+      <h2 className="text-3xl font-extrabold text-center mb-4">AI Assist</h2>
       <div className="space-y-4">
         {!isCommitted ? (
           <>
-            <p className="text-sm text-gray-400">Task: {taskDescription}</p>
-            <Button onClick={handleGenerateChanges} disabled={isLoading}>
+            <p className="text-base text-gray-400 text-center italic">{taskDescription}</p>
+            <Button onClick={handleGenerateChanges} disabled={isLoading} className="w-full text-lg font-semibold">
               {isLoading ? <LoadingSpinner size="sm" /> : 'Generate Changes'}
             </Button>
-            {error && <p className="text-red-500">{error}</p>}
+            {error && <p className="text-red-500 text-center">{error}</p>}
             {isLoading && (
               <div className="flex justify-center items-center h-96">
-                <LoadingSpinner size="lg" />
+                <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-kage-purple"></div>
               </div>
             )}
             {!isLoading && jsonChanges.length > 0 && (
-              <div className="h-96 overflow-y-auto border rounded-md p-4  text-gray-200">
+              <div className="h-96 overflow-y-auto border rounded-md p-4 text-gray-200">
                 {jsonChanges.map((file, fileIndex) => (
                   <div key={fileIndex} className="mb-6">
                     <h3 className="font-bold text-lg mb-2 text-gray-300"><code>{file.file_path}</code></h3>
@@ -131,14 +132,20 @@ export function AIAssistPopup({ isOpen, onClose, repoUrl, taskDescription }: AIA
               </div>
             )}
             {!isLoading && jsonChanges.length > 0 && (
-              <Button onClick={handleCommitChanges} disabled={isLoading} className="w-full">
-                {isLoading ? <LoadingSpinner size="sm" /> : 'Commit Changes'}
+              <Button onClick={handleCommitChanges} disabled={isLoading} className="w-full text-lg font-semibold">
+                {isLoading ? (
+                  <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-kage-purple"></div>
+                ) : (
+                  'Commit Changes'
+                )}
               </Button>
             )}
           </>
         ) : (
-          <div className="text-center">
-            <h3 className="text-green-500 font-bold">Changes Committed Successfully!</h3>
+          <div className="text-center space-y-4">
+            <CheckCircle className="h-16 w-16 text-green-500 mx-auto animate-bounce" />
+            <h3 className="text-2xl font-bold text-green-500">Commit Successful!</h3>
+            <p className="text-gray-400">Your changes have been successfully committed to the repository.</p>
           </div>
         )}
       </div>

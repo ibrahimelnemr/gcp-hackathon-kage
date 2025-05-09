@@ -44,9 +44,9 @@ class AIAssist:
         self.max_lines_per_file = 1000
         self.total_data_cap = 100 * 1024  # 100 KB
 
-        response = self.model.generate_content("Hello")
+        # response = self.model.generate_content("Hello")
 
-        print(response)
+        # print(response)
 
     def is_code_file(self, file_name: str) -> bool:
         """
@@ -403,12 +403,26 @@ class AIAssist:
 
     def apply_changes_with_pygithub(self, repo_url: str, changes: List[Dict[str, str]]):
         """
-        Apply changes using PyGithub.
+        Apply changes using PyGithub on a new branch called 'kage-assist'.
         """
         try:
             repo_name = repo_url.split("/")[-1]
             user = self.github_client.get_user()
             repo = user.get_repo(repo_name)
+
+            # Create a new branch 'kage-assist' from the default branch
+            default_branch = repo.default_branch
+            source_branch = repo.get_branch(default_branch)
+            new_branch_name = "kage-assist"    
+
+            try:
+                # Check if the branch already exists
+                repo.get_branch(new_branch_name)
+                print(f"Branch '{new_branch_name}' already exists.")
+            except Exception:
+                # Create the new branch
+                repo.create_git_ref(ref=f"refs/heads/{new_branch_name}", sha=source_branch.commit.sha)
+                print(f"Created new branch: {new_branch_name}")
 
             # Group changes by file path
             changes_by_file = {}
@@ -421,8 +435,8 @@ class AIAssist:
             # Apply changes file by file
             for file_path, file_changes in changes_by_file.items():
                 try:
-                    # Fetch the latest file content and SHA
-                    file = repo.get_contents(file_path)
+                    # Fetch the latest file content and SHA from the new branch
+                    file = repo.get_contents(file_path, ref=new_branch_name)
                     current_content = file.decoded_content.decode("utf-8")
                     lines = current_content.splitlines()
 
@@ -437,15 +451,16 @@ class AIAssist:
                         elif action == "remove":
                             lines.pop(line_number - 1)
 
-                    # Update the file with all changes
+                    # Update the file with all changes on the new branch
                     updated_content = "\n".join(lines)
                     repo.update_file(
                         path=file_path,
                         message=f"AI-generated changes for {file_path}",
                         content=updated_content,
-                        sha=file.sha  # Use the latest SHA
+                        sha=file.sha,  # Use the latest SHA
+                        branch=new_branch_name  # Specify the branch
                     )
-                    print(f"Updated file: {file_path}")
+                    print(f"Updated file: {file_path} on branch '{new_branch_name}'")
 
                 except Exception as e:
                     print(f"Error updating file {file_path}: {e}")

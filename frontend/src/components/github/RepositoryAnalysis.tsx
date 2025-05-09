@@ -145,12 +145,21 @@ export function RepositoryAnalysis() {
                       transition={{ duration: 0.3, delay: index * 0.1 }}
                     >
                       <Card className="shadow-lg hover:shadow-xl transition-shadow relative">
-                        <span className="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-md">
+                        {/* <span className="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-md">
                           Refactor
-                        </span>
+                        </span> */}
                         <CardHeader>
-                          <p className="text-lg font-medium text-gray-800">{refactor.description}</p>
+                          <p className="text-lg font-medium text-gray-300">{refactor.description}</p>
                         </CardHeader>
+                        <CardContent>
+                          <Button
+                            onClick={() => openAIAssistPopup(refactor.description)}
+                            className="bottom-2 left-2 flex items-center gap-2 text-white font-semibold py-1 px-3 rounded-md shadow-md"
+                          >
+                            <WandSparkles className="h-4 w-4" />
+                            Assist
+                          </Button>
+                        </CardContent>
                       </Card>
                     </motion.div>
                   ))}

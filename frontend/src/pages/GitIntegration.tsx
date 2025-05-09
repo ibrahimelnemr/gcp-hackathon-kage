@@ -4,9 +4,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useNavigate } from 'react-router-dom';
 import HttpHook from '@/hooks/HttpHook';
 import { BACKEND_URL } from '@/data/Data';
-import { Trash2 } from 'lucide-react';
+import { Trash2, Link, Search, WandSparkles } from 'lucide-react';
 import { useLoading } from '@/hooks/useLoading';
 import { ToastProvider, Toast, ToastTitle, ToastDescription } from '@/components/ui/toast';
+import { motion } from 'framer-motion';
 
 export default function GitIntegration() {
   const { sendRequest } = HttpHook();
@@ -101,16 +102,32 @@ export default function GitIntegration() {
   return (
     <ToastProvider>
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6">Git Integration</h1>
+        <motion.h1
+          className="text-3xl font-bold mb-6"
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          Git Integration
+        </motion.h1>
         <div className="space-y-8">
-          {projects.map((project) => (
-            <div key={project.id} className="p-4 border border-border rounded-md bg-card text-card-foreground">
+          {projects.map((project, index) => (
+            <motion.div
+              key={project.id}
+              className="p-4 border border-border rounded-md bg-card text-card-foreground"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.1 }}
+            >
               <h3 className="text-lg font-bold">{project.name}</h3>
               <p className="text-sm text-muted-foreground mb-4">{project.description}</p>
               {project.repo_url ? (
                 <div className="space-y-4">
-                  <div className="flex items-center justify-between bg-gray-800 text-white rounded-md p-3 border border-gray-700">
-                    <span className="font-mono text-sm truncate">{project.repo_url}</span>
+                  <div className="flex items-center justify-between bg-gray-700 text-gray-200 px-4 py-2 rounded-md shadow-md">
+                    <div className="flex items-center gap-2">
+                      <Link className="h-5 w-5 text-blue-500" />
+                      <span className="font-mono text-sm truncate">{project.repo_url}</span>
+                    </div>
                     <button
                       onClick={() => unlinkRepo(project.id)}
                       disabled={pageLoading}
@@ -123,13 +140,17 @@ export default function GitIntegration() {
                     <Button
                       variant="secondary"
                       onClick={() => navigate(`/projects/${project.id}/analyze`)}
+                      className="flex items-center gap-2 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md shadow-md"
                     >
+                      <Search className="h-5 w-5" />
                       Analyze Repository
                     </Button>
                     <Button
                       variant="default"
                       onClick={() => navigate(`/projects/${project.id}/ai-assist`)}
+                      className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white font-semibold py-2 px-4 rounded-md shadow-md"
                     >
+                      <WandSparkles className="h-5 w-5" />
                       AI Assist
                     </Button>
                   </div>
@@ -165,7 +186,7 @@ export default function GitIntegration() {
                   )}
                 </div>
               )}
-            </div>
+            </motion.div>
           ))}
         </div>
 

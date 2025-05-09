@@ -4,9 +4,10 @@ import { Button } from '@/components/ui/button';
 import HttpHook from '@/hooks/HttpHook';
 import { BACKEND_URL } from '@/data/Data';
 import { useLoading } from '@/hooks/useLoading';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { motion } from 'framer-motion';
 import { AIAssistPopup } from './AIAssistPopup';
+import { Link } from 'lucide-react';
 
 export function RepositoryAnalysis() {
   const { projectId } = useParams();
@@ -87,8 +88,13 @@ export function RepositoryAnalysis() {
       <h1 className="text-3xl font-extrabold text-center mb-6">Repository Analysis</h1>
       {repoUrl ? (
         <div>
-          <p className="mb-4 text-center">Repository URL: {repoUrl}</p>
-          <Button onClick={handleAnalyzeRepository} className="mb-4 w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded-md">
+          <div className="flex items-center justify-center mb-6">
+            <div className="flex items-center bg-gray-100 text-gray-800 px-4 py-2 rounded-md shadow-md">
+              <Link className="h-5 w-5 mr-2 text-blue-500" />
+              <span className="text-sm font-medium">{repoUrl}</span>
+            </div>
+          </div>
+          <Button onClick={handleAnalyzeRepository} className="mb-4 w-full text-white font-semibold py-2 rounded-md">
             Analyze Repository
           </Button>
           {error && <p className="text-red-500 text-center">{error}</p>}
@@ -105,14 +111,13 @@ export function RepositoryAnalysis() {
                       transition={{ duration: 0.3, delay: index * 0.1 }}
                     >
                       <Card className="shadow-lg hover:shadow-xl transition-shadow relative">
-                        <span className="absolute top-2 right-2 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-md">
+                        {/* <span className="absolute top-2 right-2 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-md">
                           Task
-                        </span>
+                        </span> */}
                         <CardHeader>
-                          <CardTitle className="text-lg font-semibold">Task {index + 1}</CardTitle>
+                          <p className="text-lg font-medium ">{task.description}</p>
                         </CardHeader>
                         <CardContent>
-                          <p className="mb-4 text-gray-700">{task.description}</p>
                           <Button
                             variant="outline"
                             onClick={() => openAIAssistPopup(task.description)}
@@ -141,11 +146,8 @@ export function RepositoryAnalysis() {
                           Refactor
                         </span>
                         <CardHeader>
-                          <CardTitle className="text-lg font-semibold">Refactor {index + 1}</CardTitle>
+                          <p className="text-lg font-medium text-gray-800">{refactor.description}</p>
                         </CardHeader>
-                        <CardContent>
-                          <p className="mb-4 text-gray-700">{refactor.description}</p>
-                        </CardContent>
                       </Card>
                     </motion.div>
                   ))}

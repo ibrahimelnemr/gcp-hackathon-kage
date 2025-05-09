@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Popup } from '@/components/ui/popup';
 import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import HttpHook from '@/hooks/HttpHook';
@@ -15,24 +14,27 @@ interface AIAssistPopupProps {
 
 export function AIAssistPopup({ isOpen, onClose, repoUrl, taskDescription }: AIAssistPopupProps) {
   const { sendRequest } = HttpHook();
-  const [changes, setChanges] = useState<any[]>([]);
+  const [jsonChanges, setJsonChanges] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isCommitted, setIsCommitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleGenerateChanges = async () => {
     setIsLoading(true);
-    setChanges([]);
+    setJsonChanges([]);
     setIsCommitted(false);
+    setError(null);
 
     try {
       const response = await sendRequest({
         method: 'post',
-        url: `${BACKEND_URL}/ai/assist`,
+        url: `${BACKEND_URL}/ai/generate-json-changes`,
         body: { repo_url: repoUrl, task_description: taskDescription },
       });
-      setChanges(response.changes);
+      setJsonChanges(response.json_changes);
     } catch (error) {
       console.error('Error generating changes:', error);
+      setError('Failed to generate changes. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -40,16 +42,18 @@ export function AIAssistPopup({ isOpen, onClose, repoUrl, taskDescription }: AIA
 
   const handleCommitChanges = async () => {
     setIsLoading(true);
+    setError(null);
 
     try {
       await sendRequest({
         method: 'post',
-        url: `${BACKEND_URL}/ai/commit-changes`,
-        body: { repo_url: repoUrl, changes },
+        url: `${BACKEND_URL}/ai/apply-json-changes`,
+        body: { repo_url: repoUrl, json_changes: JSON.stringify(jsonChanges) },
       });
       setIsCommitted(true);
     } catch (error) {
       console.error('Error committing changes:', error);
+      setError('Failed to commit changes. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -65,20 +69,23 @@ export function AIAssistPopup({ isOpen, onClose, repoUrl, taskDescription }: AIA
             <Button onClick={handleGenerateChanges} disabled={isLoading}>
               {isLoading ? <LoadingSpinner size="sm" /> : 'Generate Changes'}
             </Button>
-            {changes.length > 0 && (
-              <div className="space-y-4">
-                {changes.map((change, index) => (
-                  <div key={index} className="p-4 border rounded-md">
-                    <h3 className="font-bold">{change.file_path}</h3>
-                    <pre className="bg-gray-100 p-2 rounded-md">
-                      {change.content}
-                    </pre>
-                  </div>
-                ))}
-                <Button onClick={handleCommitChanges} disabled={isLoading}>
+            {error && <p className="text-red-500">{error}</p>}
+            {jsonChanges.length > 0 && (
+              <>
+                <div className="h-64 overflow-y-auto border rounded-md p-4 bg-gray-50">
+                  {jsonChanges.map((change, index) => (
+                    <div key={index} className="mb-4">
+                      <h3 className="font-bold">{change.file_path}</h3>
+                      <pre className="bg-gray-100 p-2 rounded-md">
+                        {change.content}
+                      </pre>
+                    </div>
+                  ))}
+                </div>
+                <Button onClick={handleCommitChanges} disabled={isLoading} className="w-full">
                   {isLoading ? <LoadingSpinner size="sm" /> : 'Commit Changes'}
                 </Button>
-              </div>
+              </>
             )}
           </>
         ) : (

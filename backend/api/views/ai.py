@@ -160,7 +160,7 @@ def repository_analysis(request):
 @api_view(['POST'])
 def ai_assist_functionality(request):
     """
-    Generate a Git diff for a specific task description and return it.
+    Generate JSON changes for a specific task description and return them.
     """
     try:
         # Parse the input data from the request body
@@ -171,12 +171,12 @@ def ai_assist_functionality(request):
         if not repo_url or not task_description:
             return JsonResponse({"error": "Both 'repo_url' and 'task_description' are required."}, status=400)
 
-        # Initialize AI Assist and generate the Git diff
+        # Initialize AI Assist and generate JSON changes
         ai_assist = AIAssist()
-        git_diff = ai_assist.generate_git_diff(repo_url, task_description)
+        json_changes = ai_assist.generate_json_changes(repo_url, task_description)
 
-        # Return the Git diff
-        return JsonResponse({"git_diff": git_diff}, status=200)
+        # Return the JSON changes
+        return JsonResponse({"json_changes": json_changes}, status=200)
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
@@ -198,6 +198,88 @@ def commit_ai_changes(request):
         ai_assist.apply_changes_with_pygithub(repo_url, changes)
 
         return JsonResponse({"message": "Changes committed successfully."}, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+@api_view(['POST'])
+def commit_json_changes(request):
+    """
+    Commit JSON changes to the repository.
+    """
+    try:
+        # Parse the input data from the request body
+        data = json.loads(request.body)
+        repo_url = data.get("repo_url")
+        json_changes = data.get("json_changes")
+
+        if not repo_url or not json_changes:
+            return JsonResponse({"error": "Both 'repo_url' and 'json_changes' are required."}, status=400)
+
+        # Parse JSON changes into a Python object
+        parsed_changes = json.loads(json_changes)
+
+        # Initialize AI Assist and commit the changes
+        ai_assist = AIAssist()
+        ai_assist.apply_changes_with_pygithub(repo_url, parsed_changes)
+
+        return JsonResponse({"message": "Changes committed successfully."}, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+@api_view(['POST'])
+def generate_json_changes_ai_assist(request):
+    """
+    Generate JSON changes for a specific task description and return sanitized JSON.
+    """
+    try:
+        # Parse the input data from the request body
+        data = json.loads(request.body)
+        repo_url = data.get("repo_url")
+        task_description = data.get("task_description")
+
+        if not repo_url or not task_description:
+            return JsonResponse({"error": "Both 'repo_url' and 'task_description' are required."}, status=400)
+
+        # Initialize AI Assist and generate JSON changes
+        ai_assist = AIAssist()
+        json_changes_str = ai_assist.generate_json_changes(repo_url, task_description)
+
+        # Sanitize the JSON changes string
+        sanitized_json = AIAssist.sanitize_json_content(json_changes_str)
+
+        # Parse the sanitized JSON string into a Python object
+        json_changes = json.loads(sanitized_json)
+
+        # Return the sanitized JSON changes
+        return JsonResponse({"json_changes": json_changes}, status=200)
+
+    except Exception as e:
+        return JsonResponse({"error": str(e)}, status=500)
+
+@api_view(['POST'])
+def apply_json_changes(request):
+    """
+    Apply JSON changes to the repository.
+    """
+    try:
+        # Parse the input data from the request body
+        data = json.loads(request.body)
+        repo_url = data.get("repo_url")
+        json_changes = data.get("json_changes")
+
+        if not repo_url or not json_changes:
+            return JsonResponse({"error": "Both 'repo_url' and 'json_changes' are required."}, status=400)
+
+        # Parse JSON changes into a Python object
+        parsed_changes = json.loads(json_changes)
+
+        # Initialize AI Assist and apply the changes
+        ai_assist = AIAssist()
+        ai_assist.apply_changes_with_pygithub(repo_url, parsed_changes)
+
+        return JsonResponse({"message": "Changes applied successfully."}, status=200)
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)

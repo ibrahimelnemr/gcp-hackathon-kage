@@ -208,35 +208,6 @@ class AIAssist:
         """
         return prompt
 
-    def create_prompt_for_task(self, repo_name: str, files: List[Dict[str, str]], task_description: str) -> str:
-        """
-        Create a prompt for the Gemini AI model to analyze the repository and suggest changes for a specific task.
-        """
-        file_list = "\n".join([f"- {file['name']}" for file in files])
-        prompt = f"""
-        You are an expert software engineer and repository analyzer. Your task is to analyze the repository "{repo_name}" and provide changes to meet the following task:
-
-        **Task Description:**
-        {task_description}
-
-        **Repository Structure:**
-        {file_list}
-
-        **Instructions:**
-        1. Provide the changes required to meet the task in the form of a Git diff.
-        2. Ensure the output is parseable and includes only the necessary changes.
-
-        **Example Output:**
-        ```
-        diff --git a/src/index.html b/src/index.html
-        --- a/src/index.html
-        +++ b/src/index.html
-        @@ -1,3 +1,4 @@
-        +<meta name="viewport" content="width=device-width, initial-scale=1.0">
-        ```
-        """
-        return prompt
-
     def create_prompt_for_json_changes(self, repo_name: str, files: List[Dict[str, str]], task_description: str) -> str:
         """
         Create a prompt for the Gemini AI model to output changes in JSON format.
@@ -313,33 +284,6 @@ class AIAssist:
         except Exception as e:
             raise ValueError(f"Error analyzing repository: {str(e)}")
 
-    def generate_git_diff(self, repo_url: str, task_description: str) -> str:
-        """
-        Generate a Git diff for the given task description.
-        """
-        try:
-            # Fetch repository files
-            repo_name = repo_url.split("/")[-1]
-            files = self.fetch_repository_files(repo_url)
-
-            # Create prompt
-            prompt = self.create_prompt_for_task(repo_name, files, task_description)
-
-            # Generate response from Gemini AI
-            generation_config = {
-                "temperature": 0.2,
-                "max_output_tokens": 4096,
-            }
-            response = self.model.generate_content(prompt, generation_config=generation_config)
-
-            # Parse response
-            if hasattr(response, "text"):
-                self.write_model_response_to_file(repo_name, response.text, task_description)
-                return response.text
-            else:
-                raise ValueError("Failed to generate Git diff from Gemini AI.")
-        except Exception as e:
-            raise ValueError(f"Error generating Git diff: {str(e)}")
 
     def generate_json_changes(self, repo_url: str, task_description: str) -> str:
         """
@@ -368,129 +312,6 @@ class AIAssist:
                 raise ValueError("Failed to generate JSON changes from Gemini AI.")
         except Exception as e:
             raise ValueError(f"Error generating JSON changes: {str(e)}")
-
-    def apply_git_diff_and_commit(self, repo_url: str, git_diff: str, task_description: str):
-        """
-        Apply the Git diff to the repository, validate changes, and push them to GitHub.
-        """
-        try:
-            repo_name = repo_url.split("/")[-1]
-            user = self.github_client.get_user()
-            repo = user.get_repo(repo_name)
-
-            # Parse the Git diff and validate changes
-            for diff in git_diff.split("diff --git")[1:]:
-                lines = diff.strip().split("\n")
-                file_path = lines[0].split(" ")[1][2:]  # Extract file path from diff header
-                new_content = []
-
-                for line in lines[2:]:
-                    if line.startswith("+") and not line.startswith("+++"):
-                        new_content.append(line[1:])
-                    elif not line.startswith("-") and not line.startswith("@@"):
-                        new_content.append(line)
-
-                # Fetch the file from the repository
-                try:
-                    file = repo.get_contents(file_path)
-                    current_content = file.decoded_content.decode("utf-8")
-
-                    # Validate the diff context
-                    if not current_content.startswith("\n".join(lines[2:])):
-                        print(f"Skipping file {file_path} due to mismatched context.")
-                        continue
-
-                    # Update the file
-                    repo.update_file(
-                        path=file_path,
-                        message=f"AI-generated changes for {file_path}: {task_description}",
-                        content="\n".join(new_content),
-                        sha=file.sha
-                    )
-                    print(f"Updated file: {file_path}")
-                except Exception as e:
-                    # If the file does not exist, create it
-                    repo.create_file(
-                        path=file_path,
-                        message=f"AI-generated changes for {file_path}: {task_description}",
-                        content="\n".join(new_content)
-                    )
-                    print(f"Created new file: {file_path}")
-
-            print("All changes committed and pushed to the repository.")
-
-        except Exception as e:
-            raise ValueError(f"Error applying Git diff and committing changes: {str(e)}")
-
-    def apply_git_diff_and_commit_gitpython(self, repo_url: str, git_diff: str, task_description: str):
-        """
-        Apply the Git diff to the repository, commit the changes, and push them to GitHub using gitpython.
-        """
-        try:
-            # Extract repository name and owner
-            repo_name = repo_url.split("/")[-1]
-            repo_owner = repo_url.split("/")[-2]
-
-            # Clone the repository to a specific directory
-            clone_dir = os.path.abspath(os.path.join("backend", "cloned_repos", repo_name))
-            if os.path.exists(clone_dir):
-                print(f"Deleting existing directory: {clone_dir}")
-                import shutil
-                shutil.rmtree(clone_dir)
-
-            print(f"Cloning repository {repo_url} to {clone_dir}...")
-            repo = git.Repo.clone_from(repo_url, clone_dir, branch="main")
-
-            # Set Git user configuration
-            print("Configuring Git user...")
-            repo.config_writer().set_value("user", "name", "AI Assistant").release()
-            repo.config_writer().set_value("user", "email", "ai-assistant@example.com").release()
-
-            # Clean up the Git diff to remove trailing whitespace
-            cleaned_diff = "\n".join(line.rstrip() for line in git_diff.splitlines())
-
-            # Save the Git diff as a patch file
-            patch_file_path = os.path.join(clone_dir, "temp_diff.patch")
-            print(f"Saving Git diff as a patch file at: {patch_file_path}")
-            with open(patch_file_path, "w") as patch_file:
-                patch_file.write(cleaned_diff)
-
-            # Verify that the patch file exists
-            if not os.path.exists(patch_file_path):
-                raise FileNotFoundError(f"Patch file not found at: {patch_file_path}")
-
-            # Debug: Log the patch content
-            print("Patch file content:")
-            with open(patch_file_path, "r") as patch_file:
-                print(patch_file.read())
-
-            # Apply the patch using `git apply`
-            print("Applying Git diff using `git apply`...")
-            try:
-                repo.git.apply(patch_file_path)
-                print("Git diff applied successfully using `git apply`.")
-            except Exception as e:
-                raise ValueError(f"Error applying Git diff using `git apply`: {str(e)}")
-
-            # Commit the changes
-            print("Committing changes...")
-            repo.git.add(A=True)  # Stage all changes
-            repo.git.commit(m=f"AI-generated changes for task: {task_description}")
-            print("Changes committed successfully.")
-
-            # Push the changes
-            print("Pushing changes to GitHub...")
-            origin = repo.remote(name="origin")
-            origin.push()
-            print("Changes pushed to GitHub successfully.")
-
-            # Clean up the cloned repository
-            print(f"Deleting cloned repository: {clone_dir}")
-            import shutil
-            shutil.rmtree(clone_dir)
-
-        except Exception as e:
-            raise ValueError(f"Error applying Git diff and committing changes using gitpython: {str(e)}")
 
     def test_simple_commit(self, repo_url: str):
         """

@@ -89,7 +89,7 @@ export function AIAssistPopup({ isOpen, onClose, repoUrl, taskDescription }: AIA
   };
 
   return (
-    <Popup isOpen={isOpen} onClose={onClose} className="max-w-6xl w-full bg-dark text-light">
+    <Popup isOpen={isOpen} onClose={onClose} className="max-w-6xl w-full bg-gray-900 text-gray-100">
       <h2 className="text-2xl font-bold mb-4">AI Assist</h2>
       <div className="space-y-4">
         {!isCommitted ? (
@@ -108,23 +108,20 @@ export function AIAssistPopup({ isOpen, onClose, repoUrl, taskDescription }: AIA
               <div className="h-96 overflow-y-auto border rounded-md p-4 bg-gray-800 text-gray-200">
                 {jsonChanges.map((file, fileIndex) => (
                   <div key={fileIndex} className="mb-6">
-                    <h3 className="font-bold text-lg mb-2 text-blue-400">{file.file_path}</h3>
-                    <div className="space-y-2">
+                    <h3 className="font-bold text-lg mb-2 text-gray-300">{file.file_path}</h3>
+                    <div className="space-y-1">
                       {file.changes.map((change, changeIndex) => (
                         <div
                           key={changeIndex}
-                          className={`p-2 rounded-md ${
+                          className={`text-sm font-mono ${
                             change.action === 'add'
-                              ? 'bg-green-100 text-green-800'
+                              ? 'text-green-400'
                               : change.action === 'remove'
-                              ? 'bg-red-100 text-red-800'
-                              : 'bg-blue-100 text-blue-800'
+                              ? 'text-red-400'
+                              : 'text-gray-400'
                           }`}
                         >
-                          <p className="text-sm">
-                            <span className="font-bold">Line {change.line_number}:</span>{' '}
-                            {change.content}
-                          </p>
+                          <span className="text-gray-500">[{change.line_number}]</span> {change.content}
                         </div>
                       ))}
                     </div>

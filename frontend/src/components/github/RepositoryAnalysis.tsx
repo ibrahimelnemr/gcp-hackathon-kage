@@ -89,9 +89,9 @@ export function RepositoryAnalysis() {
       {repoUrl ? (
         <div>
           <div className="flex items-center justify-center mb-6">
-            <div className="flex items-center bg-gray-100 text-gray-800 px-4 py-2 rounded-md shadow-md">
-              <Link className="h-5 w-5 mr-2 text-blue-500" />
-              <span className="text-sm font-medium">{repoUrl}</span>
+            <div className="flex items-center bg-gray-700 text-gray-200 px-4 py-2 rounded-md shadow-md">
+              <Link className="h-5 w-5 mr-2 text-gray-200" />
+              <span className="text-sm font-bold">{repoUrl}</span>
             </div>
           </div>
           <div className="flex justify-center mb-6">

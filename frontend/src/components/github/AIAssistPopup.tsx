@@ -119,29 +119,23 @@ export function AIAssistPopup({ isOpen, onClose, repoUrl, taskDescription }: AIA
                 </div>
               )}
               {!isLoading && jsonChanges.length > 0 && (
-                <div className="h-96 overflow-y-auto border rounded-md p-4 text-gray-200">
+                <div className="h-96 overflow-y-auto border rounded-md p-4 bg-black text-gray-100">
                   {jsonChanges.map((file, fileIndex) => (
                     <div key={fileIndex} className="mb-6">
                       <h3 className="font-bold text-lg mb-2 text-gray-300">
                         <code>{file.file_path}</code>
                       </h3>
-                      <div className="space-y-1">
+                      <pre className="bg-black text-gray-100 p-4 rounded-md font-mono text-sm overflow-auto">
                         {file.changes.map((change, changeIndex) => (
-                          <div
-                            key={changeIndex}
-                            className={`text-sm font-mono ${
-                              change.action === 'add'
-                                ? 'text-green-400'
-                                : change.action === 'remove'
-                                ? 'text-red-400'
-                                : 'text-gray-400'
-                            }`}
-                          >
-                            <code className="text-gray-500">[{change.line_number}]</code>{' '}
-                            <code>{change.content}</code>
+                          <div key={changeIndex}>
+                            <span className="text-gray-500">[{change.line_number}]</span>{' '}
+                            <span className="text-gray-400">
+                              {change.action === 'add' ? '(Added)' : change.action === 'remove' ? '(Removed)' : '(Modified)'}
+                            </span>{' '}
+                            {change.content}
                           </div>
                         ))}
-                      </div>
+                      </pre>
                     </div>
                   ))}
                 </div>

@@ -91,10 +91,14 @@ this will generate a .env file in the frontend folder with the correct backend u
 
 ## Working local development commands
 
-
+`cd gcp-hackathon-kage/backend`
 backend: `docker run -it --rm -p 8080:8080 -v "$(pwd)":/app -w /app kage-backend bash`
+`python manage.py runserver 0.0.0.0:8080`
 
+`cd gcp-hackathon-kage/frontend`
 frontend: `docker run --rm -it -p 5173:5173 -v "$(pwd)":/app -v kage-frontend_node_modules:/app/node_modules -w /app --user root kage-frontend bash`
+`npm run dev`
+
 npm i react-markdown react-gfm
 
 ## Database schema

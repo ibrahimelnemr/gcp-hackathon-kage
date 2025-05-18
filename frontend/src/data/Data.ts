@@ -4,7 +4,9 @@ import { v4 as uuidv4 } from "uuid";
 // export const BACKEND_URL =
 //   import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
 
-export const BACKEND_URL = 'https://kage-backend-final-895087232693.us-central1.run.app';
+// export const BACKEND_URL = 'https://kage-backend-final-895087232693.us-central1.run.app';
+
+export const BACKEND_URL = 'http://localhost:8080/';
 
 export const SAMPLE_PROJECT_NAME = "AI-Powered E-Commerce Platform";
 

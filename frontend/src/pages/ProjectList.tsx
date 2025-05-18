@@ -6,23 +6,30 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BACKEND_URL } from '@/data/Data';
 import { IProject } from '@/data/Interfaces';
 import HttpHook from '@/hooks/HttpHook';
+import { GitTokenError } from '@/components/github/GitTokenError';
 
 export default function ProjectList() {
   const [projects, setProjects] = useState<IProject[]>([]);
   const [loading, setLoading] = useState(true);
+  const [gitTokenError, setGitTokenError] = useState<string | null>(null);
   const navigate = useNavigate();
   const { sendRequest } = HttpHook();
 
   const fetchProjects = async () => {
     setLoading(true);
+    setGitTokenError(null);
     try {
       const data = await sendRequest({
         method: 'get',
         url: `${BACKEND_URL}/rest/projects`,
       });
       setProjects(data);
-    } catch (error) {
-      console.error('Error fetching projects:', error);
+    } catch (error: any) {
+      if (error.response?.status === 400 && error.response?.data?.error) {
+        setGitTokenError(error.response.data.error);
+      } else {
+        console.error('Error fetching projects:', error);
+      }
     } finally {
       setLoading(false);
     }
@@ -35,6 +42,10 @@ export default function ProjectList() {
   const handleProjectClick = (projectId: number) => {
     navigate(`/projects/${projectId}`);
   };
+
+  if (gitTokenError) {
+    return <GitTokenError />;
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -61,7 +72,7 @@ export default function ProjectList() {
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground mb-4">
-                    {project.description ? project.description.split('\n')[0] : ""}
+                    {project.description ? project.description.split('\n')[0] : ''}
                   </p>
                   <Button variant="default" onClick={() => handleProjectClick(project.id)}>
                     View Details

@@ -29,7 +29,6 @@ export function AIAssistPopup({ isOpen, onClose, repoUrl, taskDescription }: AIA
   const [isCommitted, setIsCommitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Function to process raw JSON changes into a grouped format
   const processJsonChanges = (changes: any[]): ProcessedChange[] => {
     const groupedChanges: { [key: string]: ProcessedChange } = {};
 
@@ -77,7 +76,7 @@ export function AIAssistPopup({ isOpen, onClose, repoUrl, taskDescription }: AIA
       await sendRequest({
         method: 'post',
         url: `${BACKEND_URL}/ai/apply-json-changes`,
-        body: { repo_url: repoUrl, json_changes: rawJsonChanges },
+        body: { repo_url: repoUrl, json_changes: JSON.stringify(rawJsonChanges) },
       });
       setIsCommitted(true);
     } catch (error) {
@@ -87,6 +86,8 @@ export function AIAssistPopup({ isOpen, onClose, repoUrl, taskDescription }: AIA
       setIsLoading(false);
     }
   };
+
+
 
   if (!isOpen) return null;
 
@@ -156,7 +157,7 @@ export function AIAssistPopup({ isOpen, onClose, repoUrl, taskDescription }: AIA
             </>
           ) : (
             <div className="text-center space-y-4">
-              <CheckCircle className="h-16 w-16 text-green-500 mx-auto animate-bounce" />
+              <CheckCircle className="h-16 w-16 text-green-500 mx-auto" />
               <h3 className="text-2xl font-bold text-green-500">Commit Successful!</h3>
               <p className="text-gray-400">Your changes have been successfully committed to the repository.</p>
             </div>

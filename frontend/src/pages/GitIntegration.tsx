@@ -8,7 +8,6 @@ import { Trash2, Link, Search, WandSparkles } from 'lucide-react';
 import { useLoading } from '@/hooks/useLoading';
 import { ToastProvider, Toast, ToastTitle, ToastDescription } from '@/components/ui/toast';
 import { motion } from 'framer-motion';
-import { GitTokenError } from '@/components/github/GitTokenError';
 
 export default function GitIntegration() {
   const { sendRequest } = HttpHook();
@@ -18,24 +17,18 @@ export default function GitIntegration() {
   const [selectedRepo, setSelectedRepo] = useState<string | null>(null);
   const [repoLoading, setRepoLoading] = useState(false);
   const [toast, setToast] = useState<{ title: string; description: string } | null>(null);
-  const [gitTokenError, setGitTokenError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   const fetchProjects = async () => {
     setPageLoading(true);
-    setGitTokenError(null);
     try {
       const data = await sendRequest({
         method: 'get',
         url: `${BACKEND_URL}/project/repos/`,
       });
       if (data) setProjects(data);
-    } catch (error: any) {
-      if (error.response?.status === 400 && error.response?.data?.error === 'Token not set') {
-        setGitTokenError(error.response.data.error);
-      } else {
-        console.error('Error fetching projects:', error);
-      }
+    } catch (error) {
+      console.error('Error fetching projects:', error);
     } finally {
       setPageLoading(false);
     }
@@ -43,19 +36,14 @@ export default function GitIntegration() {
 
   const fetchRepos = async () => {
     setRepoLoading(true);
-    setGitTokenError(null);
     try {
       const data = await sendRequest({
         method: 'get',
         url: `${BACKEND_URL}/github/repos/`,
       });
       if (data) setRepos(data);
-    } catch (error: any) {
-      if (error.response?.status === 400) {
-        setGitTokenError(error.response?.data?.error || 'Token not set');
-      } else {
-        console.error('Error fetching repositories:', error);
-      }
+    } catch (error) {
+      console.error('Error fetching repositories:', error);
     } finally {
       setRepoLoading(false);
     }
@@ -107,10 +95,6 @@ export default function GitIntegration() {
     fetchRepos();
   }, []);
 
-  if (gitTokenError) {
-    return <GitTokenError />;
-  }
-
   if (pageLoading) {
     return <LoadingIndicator />;
   }
@@ -140,11 +124,11 @@ export default function GitIntegration() {
               {project.repo_url ? (
                 <div className="space-y-4">
                   <div className="flex items-center gap-4">
-                    <div className="flex items-center bg-gray-700 text-gray-200 px-4 py-2 rounded-md shadow-md">
-                      <Link className="h-5 w-5 mr-2 text-gray-200" />
-                      <span className="text-sm font-bold">{project.repo_url}</span>
+                  <div className="flex items-center bg-gray-700 text-gray-200 px-4 py-2 rounded-md shadow-md">
+                        <Link className="h-5 w-5 mr-2 text-gray-200" />
+                          <span className="text-sm font-bold">{project.repo_url}</span>
                     </div>
-
+                    
                     <button
                       onClick={() => unlinkRepo(project.id)}
                       disabled={pageLoading}

@@ -76,18 +76,8 @@ For detailed setup instructions, refer to the DOCS.md file.
 
 ## 🔮 Potential Future Additions
 
-### 1. **Integration with Jira and Other Tools**
-   - Direct integration with popular project management tools like Jira, Trello, and Asana.
-   - Support for additional version control systems such as GitLab and Bitbucket.
-   - Leverage the frontend interfaces of these tools while utilizing KAGE's AI capabilities for task management and analysis.
-
-### 2. **Chat Interface for Core Interaction**
-   - A dedicated chat page for direct interaction with KAGE's AI agent.
-   - Through this interface, users can:
-     - Provide new information to create tasks dynamically.
-     - Reassess and redistribute tasks among team members.
-     - Attempt to resolve tasks using AI capabilities.
-     - Instruct KAGE to make changes to the project management system in real-time.
-   - This chat interface will enable seamless communication and task execution.
-
----
+- [ ] Integration with Jira, Trello, and Asana for task management.
+- [ ] Support for additional version control systems like GitLab and Bitbucket.
+- [ ] Dedicated chat interface for interacting with KAGE's AI agent.
+- [ ] Integration with DeepSeek models or Ollama models for local AI processing.
+- [ ] Support for a local PostgreSQL database to enable full functionality without GCP credentials.

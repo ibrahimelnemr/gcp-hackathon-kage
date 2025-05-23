@@ -1,6 +1,6 @@
 # KAGE: AI-Powered Project Management Tool
 
-KAGE is an AI-powered project management tool designed to streamline team collaboration, task assignments, and repository analysis. Built for the Google Cloud Platform Hackathon, KAGE leverages cutting-edge AI technologies to assist teams in managing projects efficiently.
+KAGE is an AI-powered project management tool designed to streamline team collaboration, task assignments, and repository analysis.
 
 ---
 

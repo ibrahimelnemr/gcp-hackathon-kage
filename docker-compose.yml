@@ -1,0 +1,26 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend:/app
+    working_dir: /app
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8080"]
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - kage-frontend_node_modules:/app/node_modules
+    working_dir: /app
+    command: ["npm", "run", "dev"]
+
+volumes:
+  kage-frontend_node_modules:

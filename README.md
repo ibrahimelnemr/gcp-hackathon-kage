@@ -60,6 +60,12 @@ KAGE is an AI-powered project management tool designed to streamline team collab
     npm run dev
     ```
 
+### Docker Compose
+
+Alternately, `cd gcp-hackathon-kage` and run `docker-compose up`
+
+This will build and run both the backend and frontend services, exposing the backend on port 8080 and the frontend on port 5173. 
+
 ---
 
 ## 📖 Documentation

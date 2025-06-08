@@ -70,7 +70,9 @@ class GitHubRepository(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.name
+        # Use the repository URL for string representation since there is no
+        # name field defined on this model.
+        return self.github_url
 
 
 # Signal to delete repositories and unlink projects when a GitHubToken is deleted
